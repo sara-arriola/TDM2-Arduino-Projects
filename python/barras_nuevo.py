@@ -12,16 +12,22 @@ TIEMPO_ESPERA = 4 # Tiempo para esperar el reinicio del Arduino
 # --- CONFIGURACIÓN DE LAS BARRAS Y VALORES ---
 NUMERO_BARRAS = 4
 VALOR_MAX_POTENCIOMETRO = 1023
-# 1024 / 4 = 256. Tamaño de cada segmento del potenciómetro
 TAMANO_SEGMENTO = 1024 // NUMERO_BARRAS 
 
 # --- CONFIGURACIÓN PYGAME ---
 VENTANA_ANCHO = 600
 VENTANA_ALTO = 400
 COLOR_FONDO = (20, 20, 40)
-COLOR_DEFAULT = (100, 100, 150) # Azul/Gris para no seleccionada
-COLOR_SELECCIONADO = (255, 0, 0)  # Rojo para la seleccionada
+COLOR_DEFAULT = (100, 100, 150) # Gris/Azulado para no seleccionada
 COLOR_TEXTO = (255, 255, 255)
+
+# Definición de los nuevos colores por posición
+COLORES_SELECCION = {
+    0: (35, 65, 255),    # Pos 1: Azul
+    1: (160, 235, 15),   # Pos 2: Verde lima
+    2: (250, 145, 20),   # Pos 3: Naranja
+    3: (165, 35, 255)    # Pos 4: Violeta
+}
 
 # Dimensiones de las barras
 ANCHO_BARRA = 100
@@ -65,8 +71,11 @@ def dibujar_barras(pantalla, indice_seleccionado, valor_pot):
 
     # Dibuja cada barra
     for i in range(NUMERO_BARRAS):
-        # Determinar el color: ROJO si coincide con el índice, sino GRIS
-        color_barra = COLOR_SELECCIONADO if i == indice_seleccionado else COLOR_DEFAULT
+        # Determinar el color: USAR EL MAPA DE COLORES si está seleccionado, sino GRIS
+        if i == indice_seleccionado:
+            color_barra = COLORES_SELECCION[i]
+        else:
+            color_barra = COLOR_DEFAULT
         
         # Calcular la posición X de la barra
         pos_x = inicio_x + i * (ANCHO_BARRA + ESPACIO_ENTRE_BARRAS)
@@ -83,13 +92,13 @@ def dibujar_barras(pantalla, indice_seleccionado, valor_pot):
 
 # --- BUCLE PRINCIPAL DE PYGAME Y SERIAL ---
 try:
-    print(f"--- Lector de Potenciómetro y Selector de Barra ---")
+    print(f"--- Lector de Potenciómetro y Selector de Barra con Colores ---")
     print(f"Intentando conexión al puerto: {PUERTO_SERIAL}...")
     
     ser = serial.Serial(
         port=PUERTO_SERIAL,
         baudrate=VELOCIDAD_BAUDIOS,
-        timeout=0.1  # Timeout corto para no bloquear el bucle de Pygame
+        timeout=0.1 
     )
     
     ser.flushInput() 
@@ -109,10 +118,8 @@ try:
                 linea_bytes = ser.readline()
                 linea_string = linea_bytes.decode('utf-8').strip()
                 
-                # *** LÓGICA DE EXTRACCIÓN CORREGIDA ***
-                # Busca el formato que el Arduino está enviando ("Potenciómetro: XXX")
+                # Lógica de Extracción (adaptada a tu formato: "Potenciómetro: XXX")
                 if "Potenciómetro:" in linea_string:
-                    # Divide la cadena por ':' y toma el último elemento (que es el número)
                     valor_str = linea_string.split(':')[-1].strip()
                     valor_potenciometro_actual = int(valor_str)
                     
@@ -120,10 +127,8 @@ try:
                     indice_barra_actual = obtener_indice_barra(valor_potenciometro_actual)
                     
             except UnicodeDecodeError:
-                # Ocurre con datos parciales o ilegibles
                 pass
             except ValueError:
-                # Ocurre si la parte después de ':' no es un número válido
                 pass
 
         # 3. Dibujar la Interfaz Gráfica
