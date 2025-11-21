@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Comunicación Arduino</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #222;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #00d2ff; }
+        
+        /* Panel de conexión */
+        .connect-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: 0.2s;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        #btnConnect { background-color: #00d2ff; color: #000; }
+        #btnConnect:hover { background-color: #00aacc; }
+
+        /* Panel de Control (Estados) */
+        .controls {
+            display: none; /* Se oculta hasta conectar */
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #00d2ff;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .state-btn { background-color: #444; color: white; }
+        .state-btn:hover { background-color: #666; }
+        .state-btn:active { background-color: #00d2ff; color: black; }
+
+        /* Visualización del Encoder */
+        .monitor {
+            margin-top: 20px;
+            padding: 20px;
+            background: #000;
+            border-radius: 5px;
+            font-family: monospace;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #scrollValue {
+            font-size: 40px;
+            color: #ffcc00;
+            display: block;
+            margin: 10px 0;
+        }
+
+        #lastMsg { color: #0f0; }
+        .log-box {
+            height: 100px;
+            overflow-y: auto;
+            border-top: 1px solid #444;
+            font-size: 12px;
+            color: #888;
+            text-align: left;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎛️ Tester Arduino Web Serial</h1>
+
+    <div class="connect-panel">
+        <button id="btnConnect">🔌 CONECTAR ARDUINO</button>
+        <div id="status">Estado: Desconectado</div>
+    </div>
+
+    <div id="controls" class="controls">
+        <h3>Enviar Estados a Arduino</h3>
+        <button class="state-btn" onclick="enviarComando('ESTADO:0')">0: INICIANDO</button>
+        <button class="state-btn" onclick="enviarComando('ESTADO:1')">1: NÚCLEO UNO</button>
+        <button class="state-btn" onclick="enviarComando('ESTADO:2')">2: NÚCLEO DOS</button>
+        <button class="state-btn" onclick="enviarComando('ESTADO:3')">3: NÚCLEO TRES</button>
+
+        <hr>
+
+        <h3>Simulador de Scroll (Encoder)</h3>
+        <div>Contador Virtual: <span id="scrollValue">0</span></div>
+        <div>Último mensaje recibido: <span id="lastMsg">Waiting...</span></div>
+        
+        <div class="log-box" id="logBox">
+            Logs aparecerán aquí...<br>
+        </div>
+    </div>
+
+    <script>
+        let port;
+        let writer;
+        let reader;
+        let keepReading = false;
+        let scrollCounter = 0;
+
+        const btnConnect = document.getElementById('btnConnect');
+        const statusDisplay = document.getElementById('status');
+        const controlsPanel = document.getElementById('controls');
+        const scrollDisplay = document.getElementById('scrollValue');
+        const lastMsgDisplay = document.getElementById('lastMsg');
+        const logBox = document.getElementById('logBox');
+
+        // === 1. CONEXIÓN ===
+        btnConnect.addEventListener('click', async () => {
+            if ("serial" in navigator) {
+                try {
+                    port = await navigator.serial.requestPort();
+                    await port.open({ baudRate: 9600 });
+
+                    // Configurar el escritor (para mandar datos al Arduino)
+                    const textEncoder = new TextEncoderStream();
+                    textEncoder.readable.pipeTo(port.writable);
+                    writer = textEncoder.writable.getWriter();
+
+                    // Configurar el lector (para recibir datos del Arduino)
+                    const textDecoder = new TextDecoderStream();
+                    port.readable.pipeTo(textDecoder.writable);
+                    reader = textDecoder.readable.getReader();
+
+                    statusDisplay.innerText = "Estado: ✅ Conectado";
+                    statusDisplay.style.color = "#0f0";
+                    btnConnect.disabled = true;
+                    controlsPanel.style.display = "block";
+                    
+                    keepReading = true;
+                    leerDatos(); // Iniciar bucle de lectura
+
+                } catch (err) {
+                    console.error("Error al conectar:", err);
+                    statusDisplay.innerText = "Error: " + err;
+                }
+            } else {
+                alert("Tu navegador no soporta Web Serial API. Usa Chrome o Edge.");
+            }
+        });
+
+        // === 2. ENVIAR DATOS (PC -> ARDUINO) ===
+        async function enviarComando(texto) {
+            if (writer) {
+                try {
+                    // Arduino lee hasta el salto de línea ('\n')
+                    await writer.write(texto + "\n");
+                    logToScreen("⬆️ Enviado: " + texto);
+                } catch (err) {
+                    console.error("Error escribiendo:", err);
+                }
+            }
+        }
+
+        // === 3. RECIBIR DATOS (ARDUINO -> PC) ===
+        async function leerDatos() {
+            let buffer = ""; // Acumulador para mensajes fragmentados
+            
+            while (port.readable && keepReading) {
+                try {
+                    const { value, done } = await reader.read();
+                    if (done) break; // El puerto se cerró
+                    
+                    if (value) {
+                        // Añadir lo recibido al buffer
+                        buffer += value;
+                        
+                        // Procesar líneas completas (separadas por \n)
+                        let lines = buffer.split('\n');
+                        
+                        // Guardar el fragmento incompleto para la siguiente vuelta
+                        buffer = lines.pop(); 
+
+                        for (let line of lines) {
+                            procesarMensaje(line.trim());
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error leyendo:", err);
+                    break;
+                }
+            }
+        }
+
+        // === 4. LÓGICA DE LA APP ===
+        function procesarMensaje(mensaje) {
+            if (!mensaje) return;
+
+            lastMsgDisplay.innerText = mensaje;
+            logToScreen("⬇️ Recibido: " + mensaje);
+
+            // Lógica visual para probar el encoder
+            if (mensaje === "CW") {
+                scrollCounter++;
+                scrollDisplay.innerText = scrollCounter;
+                animateScroll("down");
+            } else if (mensaje === "CCW") {
+                scrollCounter--;
+                scrollDisplay.innerText = scrollCounter;
+                animateScroll("up");
+            }
+        }
+
+        function logToScreen(txt) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `[${time}] ${txt}<br>`;
+            logBox.scrollTop = logBox.scrollHeight; // Auto scroll al final
+        }
+
+        function animateScroll(direction) {
+            // Pequeña animación visual en el número
+            scrollDisplay.style.transform = direction === "down" ? "translateY(5px)" : "translateY(-5px)";
+            setTimeout(() => {
+                scrollDisplay.style.transform = "translateY(0)";
+            }, 100);
+        }
+
+    </script>
+</body>
+</html>
