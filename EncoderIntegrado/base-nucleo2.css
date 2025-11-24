@@ -1,0 +1,264 @@
+
+/*----estilo nucleo 2-----*/
+
+.nucleo-2 {
+    overflow: hidden;
+    /* acá modificaría la vista de todo*/
+
+    position: absolute;
+    top: 0;
+    padding-top: 4vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; /* tamaño base del diseño */
+    height: 100%; /* altura base */
+
+}
+
+/*-------PESTAÑA NUCLEO 2------*/
+.pestaña-nucleo2{
+    width: 16%;
+    height: auto;
+
+    img{
+        width: 100%;
+        height: auto;
+    }
+}
+
+/*-----------LOOP------------*/
+.loop{
+    display:block;
+    width: auto;
+    position: fixed;
+    bottom: 15%;
+    left: 20%;
+    z-index: 1000;
+}
+
+.loop img{
+    width: 10rem;
+    height: auto;
+}
+
+
+.bubble {
+  position: relative;
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.8;
+  width: 300px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  text-align: center;
+  color: #000;
+  margin-bottom: 1rem;
+}
+
+.bubble-bottom-left:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 24px solid #fff;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #fff;
+  border-bottom: 20px solid transparent;
+  bottom: -30px;
+}
+
+/*----------REPRODUCTOR------------*/
+.nucleo-2 .reproductor{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: auto;
+}
+
+.nucleo-2 .reproductor img {
+    position: relative;
+    width: 100%;       
+    height: auto;
+}
+
+.extras{
+    position: absolute;
+    bottom: 4%;
+    left: 20%;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+}
+
+.extras .pausar{
+    background: none;
+    border: none;
+    position: relative;
+    width: 2.5rem;
+    height: auto;
+}
+
+.progreso{
+    position: relative;
+    width: 14rem;
+    height: auto;
+}
+
+/*-----BOTONES PARA IR A CADA SECCIÓN----*/
+.nucleo-2 .contenedor-botones{
+    position: absolute;
+    top: 12%;
+    left: 0.9%;
+    width: 95px;
+    height: calc(50px * 3 + 2%);
+    z-index: 1000;
+    background-color:  #4E5CA6;
+
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    row-gap: 2%;
+}
+
+.nucleo-2 .contenedor-botones button{
+    font-size: 1em;
+    width: 90px;
+    height: 50px;
+    font-weight: 500;
+    background: #5E7BB5;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    color: white;
+    border: none;
+    position: relative;
+    border-radius: 0.5em;
+    cursor: pointer;
+
+    
+}
+
+.nucleo-2 .contenedor-botones .selected {
+  transform: scale(0.97);
+  background: #243A92;
+}
+
+/*----------INFORMACIÓN DE CADA CATEGORÍA----------*/
+.categoria{
+    display: none;
+}
+
+.info-nucleo2{
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 7.62%;
+    left: 12.8%;
+    width: 93.5%;
+    height:70%;
+    gap:0;
+
+    h1{
+        font-size: 1.5rem;
+        margin-bottom: 0.5em;
+    }
+    h2{
+        font-size: 1.2rem;
+        margin-bottom: 0.5em;
+    }
+}
+
+.copyright{
+ display: block;
+}
+
+/*-----CONTENEDOR CENTRO----*/
+
+
+.info-nucleo2 .centro{
+    width:60%;
+    padding: 1em 0.5em;
+
+    h1, h2 {
+        color: white;
+    }
+}
+
+
+.centro .video{
+    width: 100%;
+    height: auto;
+    video{
+        width: 100%;
+        height: auto;
+    }
+}
+
+.demanda2{
+    display: none;
+}
+
+.demanda1{
+    display: none;
+}
+
+.centro .canciones .hide-msj{
+    display: none;
+    color: white;
+    margin-bottom: 1em;
+}
+
+/*----CONTENEDOR DERECHA----*/
+.info-nucleo2 .derecha{
+
+    padding: 1em 0.5em;
+    color: white;
+    width: 30%;
+}
+
+
+.derecha .visual{
+    width: 100%;
+    height: auto;
+    video{
+        width: 100%;
+        height: auto;
+    }
+}
+
+#canciones-video{
+    display: none;
+}
+
+.derecha .demandas ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+    button{
+        background: none;
+        border: none;
+        width: 100%;
+        height: auto;
+    }
+}
+
+
+
+/*-----------MEDIA QUERY -------------- */
+/* Desktop full screen*/
+@media (max-width: 1920px){
+
+}
+
+/* Old Desktop*/
+@media (max-width: 1024px){
+
+}
+

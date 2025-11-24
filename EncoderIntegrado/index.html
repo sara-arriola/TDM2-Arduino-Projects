@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitia SCROLL MAESTRO</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evita el scroll en la página maestra */
+        }
+
+        /* === BARRA SUPERIOR FIJA === */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 45px; /* Menos alta */
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid #00d2ff;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Alineado a la izquierda */
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        }
+
+        button {
+            padding: 8px 15px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-conn { background: #00d2ff; color: #000; margin-right: 15px; }
+        .btn-conn:hover { background: #00aacc; }
+
+        #status { display: inline-block; color: #aaa; font-size: 12px; }
+
+        /* === IFRAME CONTENEDOR === */
+        #contentFrame {
+            width: 100%;
+            height: calc(100vh); /* Ocupa el resto de la pantalla */
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar" id="bar">
+        <button id="btnConnect" class="btn-conn">🔌 CONECTAR ARDUINO</button>
+        <button onclick="hideButton('bar')">Ocultar otro botón</button>
+        <span id="status">Desconectado. Clic para conectar y empezar.</span>
+    </div>
+
+    <iframe id="contentFrame" src="nucleo11.html"></iframe>
+
+    <script type="module" src="main.js"></script>
+    <script>
+        function hideButton(targetId) {
+    const el = document.getElementById(targetId);
+    if (el) el.style.display = "none";
+}
+    </script>
+</body>
+</html>

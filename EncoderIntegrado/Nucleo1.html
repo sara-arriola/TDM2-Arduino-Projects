@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panel de composición - demo</title>
+
+<style>
+  :root{
+    --bg:#f3f3f6;
+    --panel:#ececf0;
+    --card:#d9d9de;
+    --accent:#f9f9fb;
+    --highlight:#f9d3ff;
+    --muted:#9b9ba6;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background-image: url(Diseño/Frame\ 4.png); color:#222; 
+  background-size: cover;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background:#ffffff00;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container2{
+    box-shadow:0 6px 24px rgba(0,0,0,0.08);
+    display:flex;
+    gap:18px;
+    background-size: cover;
+    padding-top: 40px;
+    align-items:center;
+    justify-content: center;
+    width: 115vh;
+    border-radius: 10px;
+    height: 84vh;
+    z-index: 2;
+  }
+
+  .container2 img{
+    width: 110vh;
+  }
+
+  .grid-panel{
+    background: #56303000;
+    padding:16px;
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+  }
+  .pad-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-auto-rows: 95px;
+    gap:12px;
+    user-select:none;
+    height:calc(100% - 28px);
+  }
+  .pad{
+    border-radius:20px;
+    background:linear-gradient(180deg,#e6e6eb,#dcdce3);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s;
+    cursor:pointer;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.03);
+    width: 90px;
+    height: 90px;
+    font-size: 0px;
+  }
+  .pad:active{ transform:scale(.995); }
+  .pad.cursor{
+    outline:4px solid rgba(255, 255, 255, 0.511);
+    transform: translateY(-3px);
+    box-shadow:0 8px 20px rgba(43,124,255,0.12);
+  }
+  .pad.selected{
+    background:linear-gradient(180deg,#ffffff,#eaf3ff);
+    border:4px solid var(--highlight);
+    transform: scale(1.02);
+  }
+
+  .composer-panel{
+    background:#815f5f00;
+    border-radius:8px;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+    width: 60%;
+    height: 60vh;
+  }
+  .stack{
+    margin-top:8px;
+    border-radius:8px;
+    padding:12px;
+    background:#22222200;
+  }
+  .stack-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:self-start;
+    max-width: 100%;
+    padding:10px;
+    border-radius:6px;
+    background:#ffffffc6;
+    box-shadow:0 2px 6px rgba(0,0,0,0.03);
+    margin-bottom:8px;
+    height: 10vh;
+  }
+  .stack-item .meta{ font-size:13px; color:#222; }
+  .stack-item .btn{ background:#f2f2f6; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:#444; border:none; }
+
+  .rightbar{
+    background: #00000000;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    z-index: 20;
+  }
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s;
+    z-index: 20;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.05);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+
+  .player{
+    width: 130vh;
+    background-color: #99b7c3da;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .player img{
+    width: 30vh;
+    margin-left: 3vh;
+  }
+
+  .all{
+    display: flex;
+    flex-direction: column;
+    width: 130vh;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  .loop{
+    display: flex;
+    position: absolute;
+    margin-top: 40vh;
+    margin-right: 10vh;
+    top: 0;
+    right: 0;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  .loop img{
+    width: 500px;
+  }
+
+  .loop.oculto {
+  opacity: 0;
+  pointer-events: none; /* evita clics mientras se desvanece */
+}
+
+  @media (max-width:980px){
+    .container{ grid-template-columns:1fr; padding:10px; }
+    .rightbar{ order:3; height:auto; flex-direction:row; justify-content:space-around; }
+  }
+
+
+  /* Botón centrado con pulso */
+.boton-centro {
+  position: fixed;
+  top: 62.5%;
+  left: 37.5%;
+  transform: translate(-50%, -50%);
+  animation: pulso 1.5s infinite ease-in-out;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.boton-centro img {
+  width: 160px;
+  transition: transform 0.2s ease;
+}
+
+/* Animación de pulso */
+@keyframes pulso {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.12); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Hover visual */
+.boton-centro:hover img {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+}
+
+</style>
+
+<link rel="stylesheet" href="nucleo-1/style.css">
+</head>
+<body>
+
+<div class="container" tabindex="0">
+  <div class="all">
+    <div class="container2" tabindex="0">
+      <div class="ventana" data-ventana="calendario">
+            <div class="contenedor-3d">
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>1930/40</h3>
+                            <h5>PIONEROS DEL SONIDO</h5>
+                            <p>Raymond Scott, pionero en la música electrónica y experimental.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="" alt=""></div>
+                    </div>
+                </div>  
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>1950</h3>
+                            <p>Illiac Suite: Primera pieza generada por computadora.</p>
+                            <p>Raymond Scott desarrolla el Electronium, máquina que genera música a partir de patrones aleatorios.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1950.png" alt="Imagen de Raymond Scott con su 'Electronium'"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>1960/70</h3>
+                            <p>MUSIC-N: Programas pioneros de síntesis digital (Max Mathews).</p>
+                            <p>Primer canto sintético en computadora (“Daisy Bell”), inspiración para HAL 9000.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1960.png" alt="Imagen de Max Mathews"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>1990</h3>
+                            <p>Proyectos académicos de síntesis de canto (Fraunhofer, MBROLA, DECtalk).</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1990.png" alt=""></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>2000</h3>
+                            <p>Vocaloid (Yamaha): Software de síntesis vocal realista.</p>
+                            <p>Hatsune Miku: Primera estrella pop virtual masiva con conciertos y fandom global.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2000.png" alt="Imagen de 'Hatsune Miku"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>2010</h3>
+                            <p>Flow Machines (Daddy 's Car): Primer tema pop compuesto por IA con notoriedad mundial.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2010.png" alt=""></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3>2020</h3>
+                            <p>Expansión de la IA musical: AIVA compone bandas sonoras. FN Meka es un rapero virtual. Jukebox, MusicLM o Suno crean canciones completas con letra y música.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2020.png" alt="Imagen del rapero IA 'FN Meka'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div><a href="#"><img src="" alt=""></a></div>
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="index2.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+<!-- BOTÓN CENTRAL -->
+<div class="loop" id="mensaje"><img src="Diseño/Frame 18 (2).png" alt="" style="display: none !important;"></div>
+
+<!-- BOTÓN CENTRAL -->
+<div class="boton-centro">
+  <img src="Diseño/boton.png" alt="Botón central" id="botonCentral" style="display: none !important;">
+</div>
+
+<script>
+    // === RECEPTOR DE MENSAJES DEL ARDUINO ===
+    window.addEventListener('message', (evento) => {
+        // 1. Verificamos que sea nuestro mensaje
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            
+            const direccion = evento.data.dir; // "CW" o "CCW"
+            // console.log("Recibido en iframe:", direccion); // Descomentar para debug
+
+            // 2. Convertimos la dirección en matemáticas (+1 o -1)
+            const delta = (direccion === "CW") ? 1 : -1;
+
+            // 3. APLICAMOS LA LÓGICA SEGÚN EL MODO
+            
+            if (typeof mode !== 'undefined') { 
+
+                if (mode === 'grid') {
+                    // Mover en la grilla (Horizontalmente, igual que el mouse)
+                    currentCol = clampMod(currentCol + delta, COLS);
+                    
+                    // 🔥 ESTO FALTABA DESCOMENTAR: Actualizar visualmente la grilla
+                    updateCursor(); 
+                    
+                } else if (mode === 'rightbar') {
+                    // Mover en la barra lateral
+                    rightBarIndex = clampMod(rightBarIndex + delta, rightBarImgs.length);
+                    
+                    // Actualizar visualmente la barra
+                    updateRightbarFocus(); 
+                }
+            } 
+        }
+    });
+</script>
+
+<script>
+const padGrid = document.getElementById('padGrid');
+const stackArea = document.getElementById('stackArea');
+const rightBar = document.getElementById('rightBar');
+const rightBarImgs = rightBar.querySelectorAll('img');
+
+const ROWS = 4, COLS = 3;
+let currentRow = 0, currentCol = 0;
+let mode = 'grid'; // "grid" o "rightbar"
+let rightBarIndex = 0;
+
+const labels = [
+  ['Guitarra 1','Guitarra 2','Guitarra 3'],
+  ['Bateria 1','Bateria 2','Bateria 3'],
+  ['Piano 1','Piano 2','Piano 3'],
+  ['Voz 1','Voz 2','Voz 3']
+];
+
+let audioCtx = null;
+function ensureAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } }
+
+const selected=[null,null,null,null];
+const padImages=[
+  ['Diseño/Property 1=Frame 1.png','Diseño/Property 1=Frame 2.png','Diseño/Property 1=Frame 13.png'],
+  ['Diseño/Component 24.png','Diseño/Component 25.png','Diseño/Component 26.png'],
+  ['Diseño/Component 27.png','Diseño/Component 28.png','Diseño/Component 29.png'],
+  ['Diseño/Component 30.png','Diseño/Component 31.png','Diseño/Component 32.png']
+];
+
+function buildGrid(){
+  padGrid.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const el=document.createElement('div');
+      el.className='pad';
+      el.style.backgroundImage=`url('${padImages[r][c]}')`;
+      el.style.backgroundSize='cover';
+      el.style.backgroundPosition='center';
+      el.dataset.row=r; el.dataset.col=c;
+      el.innerHTML=`<div class="label">${labels[r][c]}</div>`;
+      el.addEventListener('click',()=>{ currentRow=r; currentCol=c; updateCursor(); selectCurrent(); });
+      padGrid.appendChild(el);
+    }
+  }
+  updateCursor(); refreshSelectionsUI();
+}
+
+function getPadElement(row,col){ return padGrid.children[row*COLS+col]; }
+
+function updateCursor(){
+  Array.from(padGrid.children).forEach(el=>el.classList.remove('cursor'));
+  if(mode==='grid'){
+    const el=getPadElement(currentRow,currentCol);
+    if(el) el.classList.add('cursor');
+  }
+}
+
+function clampMod(v,mod){ return ((v%mod)+mod)%mod; }
+
+// --- Scroll para grid y rightbar ---
+window.addEventListener('wheel', e => {
+  if (mode === 'grid') {
+    e.preventDefault();
+    currentCol = clampMod(currentCol + (e.deltaY > 0 ? 1 : -1), COLS);
+    updateCursor();
+  } else if (mode === 'rightbar') {
+    e.preventDefault();
+    rightBarIndex = clampMod(rightBarIndex + (e.deltaY > 0 ? 1 : -1), rightBarImgs.length);
+    updateRightbarFocus();
+  }
+}, { passive: false });
+
+function updateRightbarFocus(){
+  rightBarImgs.forEach((img,i)=>img.classList.toggle('focused', i===rightBarIndex));
+}
+
+// --- BOTÓN CENTRAL ---
+const botonCentral = document.getElementById("botonCentral");
+
+// Click directo
+botonCentral.addEventListener("click", () => {
+  if (mode !== "rightbar") {
+    window.location.href = "emociones.html";
+  }
+});
+
+const loop = document.querySelector('.loop');
+let instruccionesActivas = true; // .loop visible al inicio
+
+// --- INDICADOR BOTÓN CENTRAL ---
+function updateIndicadorBotonCentral(){
+  if(mode==='grid' && !instruccionesActivas){
+    // Selecciona solo en grid cuando loop oculto
+    botonCentral.classList.add('active-button');
+    botonCentral.style.border = '4px solid #2e6bf0';
+    botonCentral.style.borderRadius = '5%';
+    botonCentral.style.boxShadow = '0 0 20px rgba(46,107,240,0.6)';
+  } else {
+    // Deselecciona en cualquier otro modo (rightbar o loop visible)
+    botonCentral.classList.remove('active-button');
+    botonCentral.style.border = 'none';
+    botonCentral.style.boxShadow = '';
+  }
+}
+
+
+// Función para ocultar loop y activar indicador
+function ocultarLoop() {
+  loop.style.transition = 'opacity 0.5s ease';
+  loop.style.opacity = '0';
+  setTimeout(() => {
+    loop.style.display = 'none';
+    instruccionesActivas = false;
+    updateIndicadorBotonCentral();
+  }, 500);
+}
+
+// Función central para cambiar de modo
+function cambiarModo(nuevoModo){
+  mode = nuevoModo;
+  if(mode==='grid') updateCursor();
+  updateRightbarFocus();
+  updateIndicadorBotonCentral(); // aquí se deselecciona boton central si no es grid
+}
+
+
+let jTimeout = null;
+let jLongPress = false;
+let justChangedMode = false;
+const jHoldThreshold = 2000; // 2s
+const postChangeLock = 200;  // 🔹 tiempo de bloqueo después de cambiar modo
+
+window.addEventListener('keydown', e => {
+  const key = e.key.toLowerCase();
+
+  if (instruccionesActivas) {
+    ocultarLoop();
+    return;
+  }
+
+  if (key === 'z' && !jTimeout) {
+    jLongPress = false;
+    jTimeout = setTimeout(() => {
+      jLongPress = true;
+      cambiarModo(mode === 'grid' ? 'rightbar' : 'grid');
+      justChangedMode = true; // bloqueo temporal
+      setTimeout(() => justChangedMode = false, postChangeLock);
+      jTimeout = null;
+    }, jHoldThreshold);
+  }
+
+  if (key === 'x') {
+    cambiarModo(mode === 'grid' ? 'rightbar' : 'grid');
+    justChangedMode = true;
+    setTimeout(() => justChangedMode = false, postChangeLock);
+  }
+
+  if (mode === 'grid') {
+    if (key === '1') { currentRow = clampMod(currentRow + 1, ROWS); updateCursor(); }
+    else if (key === 'v') { currentRow = clampMod(currentRow - 1, ROWS); updateCursor(); }
+  } else if (mode === 'rightbar') {
+    if (key === '1') { rightBarIndex = clampMod(rightBarIndex + 1, rightBarImgs.length); updateRightbarFocus(); }
+    else if (key === 'v') { rightBarIndex = clampMod(rightBarIndex - 1, rightBarImgs.length); updateRightbarFocus(); }
+  }
+});
+
+window.addEventListener('keyup', e => {
+  const key = e.key.toLowerCase();
+
+  if (key === 'z') {
+    // cancelar hold si no llegó al límite
+    if (jTimeout) {
+      clearTimeout(jTimeout);
+      jTimeout = null;
+    }
+
+    // si se cambió el modo hace muy poco, no ejecutar acción
+    if (justChangedMode || jLongPress) return;
+
+    // acción corta según modo ACTUAL
+    if (mode === 'grid') {
+      window.location.href = 'emociones.html';
+    } else if (mode === 'rightbar') {
+      const target = rightBarImgs[rightBarIndex];
+      if (!target) return;
+      const parentLink = target.closest('a');
+      if (parentLink && parentLink.getAttribute('href') && parentLink.getAttribute('href') !== '#') {
+        window.location.href = parentLink.getAttribute('href');
+      } else {
+        activateRightbarItem();
+      }
+    }
+  }
+});
+
+
+function activateRightbarItem(){
+  const target=rightBarImgs[rightBarIndex];
+  if(!target) return;
+  console.log('Seleccionaste:', target.src);
+  target.style.transform='scale(1.2)';
+  setTimeout(()=>updateRightbarFocus(),200);
+}
+
+// --- AUDIO & GRID ---
+async function selectCurrent(){
+  ensureAudio();
+  if(audioCtx.state==='suspended') await audioCtx.resume();
+  const row=currentRow, col=currentCol;
+  if(selected[row] && selected[row].col===col){ stopSelection(row); refreshSelectionsUI(); refreshGridSelectedMarkers(); return; }
+  if(selected[row]) stopSelection(row);
+  const label=labels[row][col];
+  const nodeObj=await playToneFor(row,col);
+  selected[row]={col,label,nodeObj};
+  refreshSelectionsUI(); refreshGridSelectedMarkers();
+}
+
+async function playToneFor(row,col){
+  const audioFiles=[
+    ['guitarra1.mp3','guitarra2.mp3','guitarra3.mp3'],
+    ['bateria1.mp3','bateria2.mp3','bateria3.mp3'],
+    ['piano1.mp3','piano2.mp3','piano3.mp3'],
+    ['voz1.mp3','voz2.mp3','voz3.mp3']
+  ];
+  const file=audioFiles[row][col];
+  const audio=new Audio(file);
+  audio.loop=false; audio.volume=0.6;
+  for(let r=0;r<ROWS;r++){
+    if(selected[r]?.nodeObj?.audio){ selected[r].nodeObj.audio.pause(); selected[r].nodeObj.audio.currentTime=0; }
+  }
+  audio.play().catch(()=>{});
+  audio.addEventListener('ended',()=>{audio.currentTime=0;});
+  ensureAudio();
+  let audioBuffer=null;
+  try{
+    const resp=await fetch(file);
+    const ab=await resp.arrayBuffer();
+    audioBuffer=await audioCtx.decodeAudioData(ab.slice(0));
+  }catch(err){ console.warn('No se pudo decodificar:',err); }
+  return {audio,audioBuffer,stop:()=>{audio.pause();audio.currentTime=0;},label:labels[row][col]};
+}
+
+function refreshGridSelectedMarkers(){
+  Array.from(padGrid.children).forEach(el=>{
+    el.classList.remove('selected');
+    const r=+el.dataset.row,c=+el.dataset.col;
+    if(selected[r] && selected[r].col===c) el.classList.add('selected');
+  });
+}
+
+function refreshSelectionsUI(){
+  while(stackArea.children.length>1) stackArea.removeChild(stackArea.lastChild);
+  for(let r=0;r<ROWS;r++){
+    if(selected[r]){
+      const wrapper=document.createElement('div');
+      wrapper.className='stack-item';
+      wrapper.style.display='flex';
+      wrapper.style.flexDirection='column';
+      wrapper.style.gap='6px';
+
+      const top=document.createElement('div');
+      top.style.display='flex';
+      top.style.justifyContent='space-between';
+      top.style.alignItems='center';
+
+      const meta=document.createElement('div');
+      meta.className='meta';
+      meta.innerHTML=`<strong>${selected[r].label}</strong>`;
+
+      const btn=document.createElement('button');
+      btn.className='btn';
+      btn.textContent='Quitar';
+      btn.addEventListener('click',()=>{ stopSelection(r); refreshSelectionsUI(); refreshGridSelectedMarkers(); });
+
+      top.appendChild(meta); top.appendChild(btn); wrapper.appendChild(top);
+      const canvas=document.createElement('canvas'); canvas.width=300; canvas.height=60; wrapper.appendChild(canvas);
+      if(selected[r].nodeObj?.audioBuffer){ drawWaveform(selected[r].nodeObj.audioBuffer,canvas); }
+      stackArea.appendChild(wrapper);
+    }
+  }
+  refreshGridSelectedMarkers();
+}
+
+function stopSelection(row){ if(!selected[row])return; try{selected[row].nodeObj.stop();}catch(e){} selected[row]=null; }
+
+function drawWaveform(audioBuffer,canvas){
+  const ctx=canvas.getContext('2d');
+  const width=canvas.width, height=canvas.height;
+  ctx.clearRect(0,0,width,height);
+  if(!audioBuffer){ ctx.fillText('⚠️ Sin forma de onda',10,20); return; }
+  const data=audioBuffer.getChannelData(0);
+  const step=Math.ceil(data.length/width);
+  const amp=height/2;
+  ctx.beginPath();
+  for(let i=0;i<width;i++){
+    let min=1,max=-1;
+    for(let j=0;j<step;j++){ const datum=data[i*step+j]; if(datum<min)min=datum; if(datum>max)max=datum; }
+    ctx.lineTo(i,(1+min)*amp); ctx.lineTo(i,(1+max)*amp);
+  }
+  ctx.strokeStyle='#2e6bf0'; ctx.lineWidth=1; ctx.stroke();
+}
+
+// --- PLAY / PAUSE GLOBAL ---
+let isPlaying=false;
+const playButton=document.querySelector('.wire-btn.circle');
+playButton.textContent='▶️';
+playButton.addEventListener('click',()=>{
+  ensureAudio();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  for(let r=0;r<ROWS;r++){ if(selected[r]?.nodeObj?.audio){ selected[r].nodeObj.audio.pause(); selected[r].nodeObj.audio.currentTime=0; } }
+  if(!isPlaying){
+    for(let r=0;r<ROWS;r++){ if(selected[r]?.nodeObj?.audio){ const a=selected[r].nodeObj.audio; a.currentTime=0; a.play().catch(()=>{}); } }
+    playButton.textContent='⏸️';
+  }else{
+    for(let r=0;r<ROWS;r++){ if(selected[r]?.nodeObj?.audio){ selected[r].nodeObj.audio.pause(); } }
+    playButton.textContent='▶️';
+  }
+  isPlaying=!isPlaying;
+});
+
+// --- INIT ---
+buildGrid();
+document.querySelector('.container').addEventListener('click',()=>document.querySelector('.container').focus());
+updateRightbarFocus();
+updateIndicadorBotonCentral();
+
+</script>
+
+<script>
+  window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    
+    // Si la tecla presionada es 'e'
+    if (key === 'e') {
+        // Redirige a la página principal
+        window.location.href = 'nucleo11.html';
+    }
+});
+</script>
+
+<script src="nucleo-1/dialogo.js"></script>
+<script src="nucleo-1/movimientoMenu.js"></script>
+<script src="nucleo-1/widgets.js"></script>
+
+</body>
+</html>
