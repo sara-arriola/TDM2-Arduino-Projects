@@ -1,0 +1,192 @@
+:root{
+    --fuente-base: 'Segoe UI', 'sans-serif';
+    --color-fuente: #1a1a1a;
+    --color-fuente-secundario: #ececec;
+}
+
+html{
+    font-size: 1rem;
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    font-family: var(--fuente-base);
+    overflow: hidden;
+}
+
+.desktop{
+    width: 100vw;
+    height: 100vh;
+    background-image: url(../img/background.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.widgets{
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    justify-content: end;
+    align-items: center;
+    gap: 2rem;
+}
+
+.widget{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    margin: 0 2rem;
+    width: auto;
+}
+
+.widget img{
+    width: 10vw;
+    height: auto;
+}
+
+.widget-name{
+    font-size: 1.1rem;
+    color: var(--color-fuente-secundario);
+}
+
+.loop{
+    position: fixed;
+    bottom: 7rem;
+    left: 2rem;
+}
+
+.loop img{
+    width: 10rem;
+}
+
+@keyframes dialogoMov {
+  0% {
+    transform: scale(1); 
+  }
+  50% {
+    transform: scale(1.03); 
+  }
+  100% {
+    transform: scale(1); 
+  }
+}
+
+.loop-dialogo{
+    position: relative;
+    width: auto;
+    top: -1rem;
+    left: 5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.8;
+    border-radius: 1rem;
+    cursor: default;
+    animation: dialogoMov 3s infinite ease-in-out;
+    transition: transform 0.3s ease-in-out;
+}
+
+.loop-dialogo:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 24px solid #fff;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #fff;
+  border-bottom: 20px solid transparent;
+  bottom: -30px;
+}
+
+.ventana {
+  display: block;
+  perspective:1400px;
+  width: 600px;
+  height: 350px;
+  flex-direction: row;
+  position: fixed;  
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  z-index: 10000;       
+  overflow: visible;
+}
+
+.contenedor-3d {
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition: transform 600ms cubic-bezier(.2,.9,.2,1);
+    transform: rotateX(-15deg);
+}
+
+.calendario-ventana {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border-radius:10px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    color:#fff;
+    font-size:1.25rem;
+    overflow: hidden;
+    backface-visibility:hidden;
+    transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 300ms ease;
+    cursor:pointer;
+    user-select:none;
+}
+
+.contenido-calendario{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 1rem;
+}
+
+.imagen-calendario img{
+    width: 100%;
+}
+
+
+.calendario-ventana:nth-child(1){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(2){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(3){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(4){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(5){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(6){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+.calendario-ventana:nth-child(7){ background: linear-gradient(135deg,#2F6892,#3c7dac); }
+
+.calendario-ventana.front{
+    box-shadow: 0 30px 60px rgba(0,0,0,0.65);
+    transform-origin:center;
+}
+
+.taskbar{
+    width: 100vw;
+    background: linear-gradient(180deg, #8B96B1 11.54%, #929295 14.9%, #132F47 75%);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+
+.taskbar .taskbar-logo{
+    position: sticky;
+    width: 3vw;
+    left: 0.5rem;
+    cursor: pointer;
+}
+
+/*---------- MEDIA QUERIES PARA LA PANTALLA FINAL ----------*/
+
+@media (max-width: 1024px) {
+}
