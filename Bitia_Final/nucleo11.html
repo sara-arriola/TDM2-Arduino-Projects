@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bitia - Home</title>
+
+<link rel="stylesheet" href="nucleo-1/style.css">
+
+<style>
+  /* === ESTILOS ESPECÍFICOS DEL HOME === */
+  :root{
+    --fuente-base: 'Segoe UI', 'sans-serif';
+  }
+  body{ 
+    margin:0; 
+    font-family: var(--fuente-base); 
+    background-image: url(Diseño/Frame\ 4.png); 
+    color:#222; 
+    background-size: cover;
+    overflow: hidden;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background: transparent;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+    gap: 100px;
+  }
+
+  .container2{
+    position: relative;
+    width: 115vh;
+    height: 84vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  /* TARJETA DE BIENVENIDA */
+  .hero-card {
+    width: 800px;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(32, 89, 145, 0.85) 0%, rgba(26, 58, 90, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    backdrop-filter: blur(5px);
+  }
+
+  .hero-card h1 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .hero-card h2 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 40px;
+    color: #ddd;
+  }
+
+  .btn-start {
+    background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+    color: white;
+    border: none;
+    padding: 15px 60px;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 114, 255, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .btn-start:hover, .btn-start.focused {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 198, 255, 0.8);
+    outline: 3px solid white;
+  }
+
+  /* === BARRA LATERAL === */
+  .rightbar{
+    background: transparent;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    z-index: 20;
+  }
+
+  /* 🔥 NUEVO ESTILO: LED DE ESTADO 🔥 */
+  .status-led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-bottom: 25px; /* Separación de los iconos */
+      
+      /* COLOR AMARILLO (Estado 0) */
+      background-color: #a6ff00; 
+      box-shadow: 0 0 15px #b7ff00, 0 0 5px #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+      
+      transition: all 0.3s ease;
+  }
+
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s, filter .15s;
+    z-index: 20;
+    opacity: 0.8;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.1);
+    filter: brightness(1.3);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+    opacity: 1;
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="container2">
+      <div class="hero-card">
+          <h1>Creación de música con IA</h1>
+          <h2>¿Listo para hacer tu propia canción?</h2>
+          <button class="btn-start" id="btnStart">Listo!</button>
+      </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+
+<script>
+    const KEYS = window.parent.BITIA_KEYS || { 
+        ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e' 
+    };
+
+    window.modoSidebar = false; 
+    
+    const rightBarImgs = document.querySelectorAll('.rightbar img');
+    let rightBarIndex = 0;
+    const btnStart = document.getElementById('btnStart');
+
+    // === ACTUALIZAR VISTA ===
+    function updateVisuals() {
+        if (window.modoSidebar) {
+            rightBarImgs.forEach((img, i) => {
+                if (i === rightBarIndex) img.classList.add('focused');
+                else img.classList.remove('focused');
+            });
+            btnStart.classList.remove('focused');
+        } else {
+            rightBarImgs.forEach(img => img.classList.remove('focused'));
+            btnStart.classList.add('focused');
+        }
+    }
+
+    // === CONTROL DE MODO ===
+    let accionTimeout = null;
+    let accionLongPress = false;
+    const accionHoldThreshold = 2000; 
+    
+    function toggleMode() {
+        window.modoSidebar = !window.modoSidebar;
+        console.log("Modo Sidebar:", window.modoSidebar);
+        updateVisuals();
+
+        const hero = document.querySelector('.hero-card');
+        if(window.modoSidebar) {
+            hero.style.opacity = '0.5';
+            hero.style.filter = 'grayscale(1)';
+        } else {
+            hero.style.opacity = '1';
+            hero.style.filter = 'none';
+        }
+    }
+
+    // === TECLADO ===
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return; 
+        const key = e.key.toLowerCase();
+
+        if (key === KEYS.ACCION) {
+            accionLongPress = false; 
+            accionTimeout = setTimeout(() => {
+                accionLongPress = true; 
+                toggleMode();           
+            }, accionHoldThreshold); 
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key.toLowerCase() === KEYS.ACCION) {
+            if (accionTimeout) {
+                clearTimeout(accionTimeout);
+                accionTimeout = null;
+            }
+            
+            if (!accionLongPress) {
+                if (window.modoSidebar) {
+                    const parentLink = rightBarImgs[rightBarIndex].closest('a');
+                    if (parentLink && parentLink.getAttribute('href') && parentLink.getAttribute('href') !== '#') {
+                        window.location.href = parentLink.getAttribute('href'); 
+                    }
+                } else {
+                    // Click en Botón Central -> No hace nada
+                }
+            }
+            accionLongPress = false;
+        }
+    });
+
+    // === ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+            if (window.modoSidebar) {
+                rightBarIndex = (rightBarIndex + delta + rightBarImgs.length) % rightBarImgs.length;
+                updateVisuals();
+            } 
+        }
+    });
+
+    updateVisuals();
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try { window.parent.app.setNucleo(0); } catch(e){}
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>

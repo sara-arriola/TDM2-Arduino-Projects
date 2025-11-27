@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panel de composición - demo</title>
+
+<link rel="stylesheet" href="base-nucleo2.css">
+<link rel="stylesheet" href="desktop.css">
+
+<style>
+  :root{
+    --bg:#f3f3f6;
+    --panel:#ececf0;
+    --card:#d9d9de;
+    --accent:#f9f9fb;
+    --highlight:#f9d3ff;
+    --muted:#9b9ba6;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background-image: url(Diseño/Frame\ 4.png); color:#222; 
+  background-size: cover;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background:#ffffff00;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container2{
+    box-shadow:0 6px 24px rgba(0,0,0,0.08);
+    display:flex;
+    gap:18px;
+    background-size: cover;
+    padding-top: 40px;
+    align-items:center;
+    justify-content: center;
+    width: 115vh;
+    border-radius: 10px;
+    height: 84vh;
+    z-index: 2;
+  }
+
+  .container2 img{
+    width: 110vh;
+  }
+
+  /* SIDEBAR */
+  .rightbar{
+    background: #00000000;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center !important;
+    justify-content:center !important;
+    z-index: 20;
+  }
+
+  /* LED */
+  .status-led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-bottom: 25px; 
+      background-color: #a6ff00; 
+      box-shadow: 0 0 15px #a6ff00, 0 0 5px #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s;
+    z-index: 20;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.05);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+
+  .all{
+    display: flex;
+    flex-direction: column;
+    width: 130vh;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  .loop.oculto {
+    opacity: 0;
+    pointer-events: none; 
+  }
+
+  /* Botón centrado */
+  .boton-centro {
+    position: fixed;
+    top: 62.5%;
+    left: 37.5%;
+    transform: translate(-50%, -50%);
+    animation: pulso 1.5s infinite ease-in-out;
+    cursor: pointer;
+    z-index: 20;
+  }
+
+  .boton-centro img {
+    width: 160px;
+    transition: transform 0.2s ease;
+  }
+
+  @keyframes pulso {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.12); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .boton-centro:hover img {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+  }
+
+</style>
+
+<link rel="stylesheet" href="nucleo-1/style.css">
+</head>
+<body>
+
+<div class="container" tabindex="0">
+  <div class="all">
+    <div class="container2" tabindex="0">
+      <div class="nucleo-2">
+        <div class="loop">
+            <div id="loop-dialogo" class="bubble bubble-bottom-left">
+                <p id="dialogo">Estamos en el reproductor. Te enterarás sobre la IA en la música, canciones hechas con IA y demandas por copyright.</p>
+            </div>  
+            <img src="../img/loop.png" alt="Imagen de loop, ayudante virtual">
+        </div>
+
+        <div class="reproductor">
+             <div class="fondo">
+                <img src="img/reproductor.png" alt="reproductor de música Nucleo 3">
+                 <ol class="contenedor-botones">
+                    <li> <button class="btn" id="copyright">Copyright</button> </li>
+                    <li> <button class="btn" id="canciones">Canciones</button> </li>
+                    <li> <button class="btn" id="demandas">Demandas</button> </li>
+                </ol>
+                <div class="extras">
+                    <button class="pausar"><img src="img/despausa.png" alt=""></button>
+                    <div class="progreso">
+                        <img src="img/linea.png" alt="">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-nucleo2">
+            <div class="centro">
+                <article class="copyright categoria video">
+                    <video id="copyright-video" src="video/copyright.mp4"></video>
+                </article>
+                <article class="categoria canciones">
+                    <h2>Canciones</h2>
+                    <h1>Hechas con IAs musicales y reales</h1>
+                    <ul>
+                        <li>
+                            <button ><img class="song" src="img/dust.png" alt=""></button>
+                            <p class="hide-msj">Es una banda creada con IA.Su tema “Dust on the Wind” se volvió viral en 2025 y reveló cómo la IA puede generar música, voces e imágenes, abriendo el debate sobre autoría y creatividad artificial.</p>
+                        </li>
+                        <li>
+                            <button ><img class="song" src="img/rumbaCongo.png" alt=""></button>
+                             <p class="hide-msj">Es una creación hecha con IA que imita música afro-cubana. La banda y su historia son ficticias, mostrando cómo la IA puede crear artistas. Poniendo en duda los límites entre lo real y lo artificial.</p>
+                        </li>
+                        <li>
+                            <button ><img class="song" src="img/heart.png" alt=""></button>
+                             <p class="hide-msj">Fue creada por el usuario anónimo Ghostwriter con IA, imitando las voces de Drake y The Weeknd. Los artistas no participaron.El tema se volvió viral y fue eliminado por violar derechos de autor.</p>
+                        </li>
+                        <li>
+                            <button ><img class="song" src="img/nostalgia.png" alt=""></button>
+                             <p class="hide-msj">Canción del proyecto FlowGPT que utiliza voces generadas por IA para imitar a artistas como Bad Bunny, Daddy Yankee y Justin Bieber. La canción se volvió viral y Bad Bunny denunció el uso no autorizado de su voz.</p>
+                        </li>
+                        <li>
+                            <button ><img class="song" src="img/pasarella.png" alt=""></button>
+                             <p class="hide-msj">Canción de Emilia junto a Six Sex, lanzada en 2025.Combina pop y ritmos urbanos. A diferencia de otros casos recientes de música generada con IA, esta es una composición original, creada e interpretada por las artistas sin uso de IA.</p>
+                        </li>
+                    </ul>
+                </article>
+                <article class="demandas categoria">
+                    <h2>Demanda</h2>
+                    <div id="cuerpo-demanda"></div>
+                </article>
+             </div>
+             <div class="derecha">
+                <article class="copyright categoria">
+                    <div class="visual">
+                        <video src="video/efecto1.mp4" autoplay loop muted></video>
+                    </div>
+                </article>
+                <article class="categoria canciones">
+                    <div class="visual">
+                        <video id="canciones-video" src="video/dustontheWind.mp4"></video>
+                    </div>
+                </article>
+                <article class="demandas categoria">
+                    <ul>
+                        <li><button><img class="btn-demanda" src="img/demanda1.png" alt=""></button></li>
+                        <li><button><img class="btn-demanda" src="img/demanda2.png" alt="" id="demanda2"></button></li> 
+                    </ul>
+                </article>
+             </div>
+             </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+<div class="loop" id="mensaje"><img src="Diseño/Frame 18 (2).png" alt="" style="display: none !important;"></div>
+
+<div class="boton-centro">
+  <img src="Diseño/boton.png" alt="Botón central" id="botonCentral" style="display: none !important;">
+</div>
+
+<script src="js/btn.js"></script>
+<script src="js/dialogo.js"></script>
+<script src="js/songs.js"></script>
+<script src="js/demanda.js"></script>
+<script src="js/copyright.js"></script>
+
+<script>
+    const KEYS = window.parent.BITIA_KEYS || { ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e' };
+
+    window.modoSidebar = false; 
+    
+    const rightBar = document.getElementById('rightBar');
+    const rightBarImgs = rightBar.querySelectorAll('img');
+    let rightBarIndex = 0;
+
+    function updateRightbarFocus() {
+        rightBarImgs.forEach((img, i) => {
+            if (window.modoSidebar && i === rightBarIndex) {
+                img.classList.add('focused');
+            } else {
+                img.classList.remove('focused');
+            }
+        });
+    }
+
+    // === CONTROL DE MODO ===
+    let accionTimeout = null;
+    let accionLongPress = false; // Bandera para distinguir click de mantener
+    
+    window.addEventListener('keydown', (e) => {
+        // 🔥 PREVENIR REPETICIÓN AUTOMÁTICA 🔥
+        if (e.repeat) return; 
+
+        const key = e.key.toLowerCase();
+
+        // ACCION MANTENIDA (Sidebar)
+        if (key === KEYS.ACCION) {
+            accionLongPress = false; // Reseteamos al empezar a presionar
+            accionTimeout = setTimeout(() => {
+                accionLongPress = true; // ¡Ahora sí es larga!
+                
+                window.modoSidebar = !window.modoSidebar;
+                console.log("Modo Sidebar:", window.modoSidebar);
+                updateRightbarFocus(); 
+                
+                try {
+                    const app = window.parent.app;
+                    if (window.modoSidebar) app.setNucleo(0); // Amarillo
+                    else app.setNucleo(2); // Azul
+                } catch(e){}
+
+                accionTimeout = null;
+            }, 2000); // 2 segundos
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key.toLowerCase() === KEYS.ACCION) {
+            if (accionTimeout) {
+                clearTimeout(accionTimeout);
+                accionTimeout = null;
+            }
+            
+            // ACCION CORTA (Click)
+            // Solo ejecutamos si NO fue larga
+            if (!accionLongPress) {
+                // Si estamos en la barra y soltamos +, navegamos
+                if (window.modoSidebar) {
+                    const target = rightBarImgs[rightBarIndex];
+                    const parentLink = target.closest('a');
+                    if (parentLink) {
+                        window.location.href = parentLink.href; 
+                    }
+                }
+                // Si estamos en la App, btn.js se encarga
+            }
+            
+            accionLongPress = false; // Limpieza final
+        }
+        
+        if (e.key.toLowerCase() === KEYS.SALIR) {
+            window.location.href = 'inicio.html';
+        }
+    });
+
+    // === ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+
+            if (window.modoSidebar) {
+                rightBarIndex = (rightBarIndex + delta + rightBarImgs.length) % rightBarImgs.length;
+                updateRightbarFocus();
+            }
+        }
+    });
+
+    // INIT
+    updateRightbarFocus();
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try {
+                const parentApp = window.parent.app;
+                if (parentApp && typeof parentApp.setNucleo === 'function') {
+                    parentApp.setNucleo(2);
+                    console.log("Nucleo 2: Estado 2 enviado.");
+                }
+            } catch (e) { console.warn(e); }
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panel de composición - Emociones</title>
+<style>
+  :root{
+    --bg:#f3f3f6;
+    --panel:#ececf0;
+    --card:#d9d9de;
+    --accent:#f9f9fb;
+    --highlight:#f9d3ff;
+    --muted:#9b9ba6;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background-image: url(Diseño/Frame\ 4.png); color:#222; 
+  background-size: cover;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background:#ffffff00;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container2{
+    box-shadow:0 6px 24px rgba(0,0,0,0.08);
+    display:flex;
+    flex-direction: column; /* Apilar contenido verticalmente */
+    gap:18px;
+    background-image: url(Diseño/Frame\ 3.png);
+    background-size: cover;
+    padding-top: 0;
+    align-items:center;
+    justify-content: center;
+    width: 115vh;
+    border-radius: 10px;
+    height: 84vh;
+    position: relative; /* Para posicionamiento absoluto interno si hace falta */
+  }
+
+  /* SIDEBAR */
+  .rightbar{
+    background: #00000000;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    z-index: 20;
+  }
+
+  /* 🔥 LED DE ESTADO (AMARILLO LIMA) 🔥 */
+  .status-led {
+      display: block !important;
+      width: 15px !important;
+      height: 15px !important;
+      border-radius: 50% !important;
+      margin-bottom: 25px !important;
+      background-color: #a6ff00 !important; 
+      box-shadow: 0 0 15px #a6ff00, 0 0 5px #fff !important;
+      border: 2px solid rgba(255,255,255,0.5) !important;
+  }
+
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s;
+    z-index: 20;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.05);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+
+  .all{
+    display: flex;
+    flex-direction: column;
+    width: 130vh;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* CONTENEDOR DE BOTONES (Centrado dentro de container2) */
+  .botones {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    z-index: 10;
+  }
+
+  .botones h1{
+    color: #fff;
+    font-size: 48px;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .orden{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px; 
+  }
+
+  /* OPCIÓN INDIVIDUAL (SOLO IMAGEN) */
+  .opcion-emocion {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+    opacity: 0.6; 
+    display: flex;
+    justify-content: center;
+  }
+
+  .opcion-emocion img {
+    width: 160px; 
+    transition: filter 0.3s ease;
+    display: block;
+  }
+
+  /* ESTADO SELECCIONADO */
+  .opcion-emocion.seleccionado {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+
+  .opcion-emocion.seleccionado img {
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9));
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container" tabindex="0">
+  <div class="all">
+    <div class="container2" tabindex="0">
+       <div class="botones">
+          <h1>¿Cómo te sentís?</h1>
+          
+          <div class="orden">
+            <div class="opcion-emocion" id="opt1">
+                <img src="Diseño/Frame 18 (3).png" alt="Enojado">
+            </div>
+
+            <div class="opcion-emocion" id="opt2">
+                <img src="Diseño/Frame 20.png" alt="Feliz">
+            </div>
+
+            <div class="opcion-emocion" id="opt3">
+                <img src="Diseño/Frame 19 (1).png" alt="Triste">
+            </div>
+          </div>
+       </div>
+
+    </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="Nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+
+<div class="loop" id="mensaje">
+  <img src="Diseño/Frame 18 (2).png" alt="" style="display: none;">
+</div>
+
+<script>
+    // ⭐ 1. IMPORTAR TECLAS DEL PADRE ⭐
+    const KEYS = window.parent.BITIA_KEYS || { 
+        ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e' 
+    };
+
+    // === VARIABLES GLOBALES ===
+    window.modoSidebar = false; 
+    
+    // Barra Lateral
+    const rightBar = document.getElementById('rightBar');
+    const rightBarImgs = rightBar.querySelectorAll('img');
+    let rightBarIndex = 0;
+
+    // Botones Emociones
+    const opciones = document.querySelectorAll('.opcion-emocion');
+    let indiceEmocion = 0;
+    // Marcar inicial
+    if(opciones.length > 0) opciones[indiceEmocion].classList.add('seleccionado');
+
+    // === FUNCIONES VISUALES ===
+    function updateVisuals() {
+        if (window.modoSidebar) {
+            // Modo Barra Lateral
+            rightBarImgs.forEach((img, i) => {
+                if (i === rightBarIndex) img.classList.add('focused');
+                else img.classList.remove('focused');
+            });
+            // Desactivar emociones
+            opciones.forEach(op => op.classList.remove('seleccionado'));
+        } else {
+            // Modo Centro (Emociones)
+            opciones.forEach((op, i) => {
+                if (i === indiceEmocion) op.classList.add('seleccionado');
+                else op.classList.remove('seleccionado');
+            });
+            // Desactivar barra lateral
+            rightBarImgs.forEach(img => img.classList.remove('focused'));
+        }
+    }
+
+    // === CONTROL TECLADO ===
+    let accionTimeout = null;
+    let accionLongPress = false;
+    const accionHoldThreshold = 2000;
+
+    function toggleMode() {
+        window.modoSidebar = !window.modoSidebar;
+        updateVisuals();
+        // Arduino: Siempre Estado 0
+        try { window.parent.app.setNucleo(0); } catch(e){}
+    }
+
+    window.addEventListener('keydown', e => {
+        if(e.repeat) return; // Evitar repetición
+
+        const key = e.key.toLowerCase();
+
+        // ACCION MANTENIDA: Cambiar modo
+        if (key === KEYS.ACCION && !accionTimeout) {
+            accionLongPress = false;
+            accionTimeout = setTimeout(() => {
+                accionLongPress = true;
+                toggleMode();
+                accionTimeout = null;
+            }, accionHoldThreshold);
+        }
+
+        // NAVEGACIÓN
+        if (window.modoSidebar) {
+            if (key === KEYS.ARRIBA) { rightBarIndex = (rightBarIndex + 1) % rightBarImgs.length; updateVisuals(); }
+            if (key === KEYS.ABAJO) { rightBarIndex = (rightBarIndex - 1 + rightBarImgs.length) % rightBarImgs.length; updateVisuals(); }
+        } else {
+            // Mover entre caritas
+            if (key === KEYS.ARRIBA) { indiceEmocion = (indiceEmocion + 1) % opciones.length; updateVisuals(); }
+            if (key === KEYS.ABAJO) { indiceEmocion = (indiceEmocion - 1 + opciones.length) % opciones.length; updateVisuals(); }
+        }
+    });
+
+    window.addEventListener('keyup', e => {
+        if (e.key.toLowerCase() === KEYS.ACCION) {
+            if (accionTimeout) {
+                clearTimeout(accionTimeout);
+                accionTimeout = null;
+            }
+
+            // ACCIÓN CORTA (Solo si no fue larga)
+            if (!accionLongPress) {
+                if (window.modoSidebar) {
+                    // Navegar Sidebar
+                    const parentLink = rightBarImgs[rightBarIndex].closest('a');
+                    if (parentLink && parentLink.getAttribute('href') && parentLink.getAttribute('href') !== '#') {
+                        window.location.href = parentLink.getAttribute('href');
+                    }
+                } else {
+                    // Seleccionar emoción -> Ir al Mezclador
+                    window.location.href = "emociones1.html";
+                }
+            }
+            accionLongPress = false;
+        }
+
+        if (e.key.toLowerCase() === KEYS.SALIR) {
+            window.location.href = 'index.html';
+        }
+    });
+
+    // === RECEPTOR ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+
+            if (window.modoSidebar) {
+                rightBarIndex = (rightBarIndex + delta + rightBarImgs.length) % rightBarImgs.length;
+            } else {
+                indiceEmocion = (indiceEmocion + delta + opciones.length) % opciones.length;
+            }
+            updateVisuals();
+        }
+    });
+
+    // === INICIALIZAR ===
+    updateVisuals();
+
+    // FORZAR ESTADO 0 (AMARILLO)
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try {
+                const parentApp = window.parent.app;
+                if (parentApp && typeof parentApp.setNucleo === 'function') {
+                    parentApp.setNucleo(0); 
+                    console.log("✅ Emociones (Intro): Estado 0 enviado.");
+                }
+            } catch (e) { console.warn(e); }
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>

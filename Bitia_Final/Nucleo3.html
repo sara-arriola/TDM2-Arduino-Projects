@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panel de composición - Intro</title>
+<style>
+  :root{
+    --bg:#f3f3f6;
+    --panel:#ececf0;
+    --card:#d9d9de;
+    --accent:#f9f9fb;
+    --highlight:#f9d3ff;
+    --muted:#9b9ba6;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background-image: url(Diseño/Frame\ 4.png); color:#222; 
+  background-size: cover;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background:#ffffff00;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container2{
+    box-shadow:0 6px 24px rgba(0,0,0,0.08);
+    display:flex;
+    gap:18px;
+    background-image: url(Diseño/Frame\ 3.png);
+    background-size: cover;
+    padding-top: 40px;
+    align-items:center;
+    justify-content: center;
+    width: 115vh;
+    border-radius: 10px;
+    height: 84vh;
+  }
+
+  .container2 img{
+    width: 110vh;
+  }
+
+  /* SIDEBAR (Nivel 50) */
+  .rightbar{
+    background: #00000000;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    z-index: 50; 
+  }
+
+  /* 🔥 LED DE ESTADO (ROJO) 🔥 */
+  .status-led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-bottom: 25px; 
+      background-color: #a6ff00; 
+      box-shadow: 0 0 15px #a6ff00, 0 0 5px #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s;
+    z-index: 50;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.05);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+
+  .all{
+    display: flex;
+    flex-direction: column;
+    width: 130vh;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 🔥 PERSONAJE LOOP (SIN TEXTO, ENCIMA DE TODO) 🔥 */
+  .loop {
+    position: fixed; 
+    bottom: 0;       
+    right: 5%;       
+    display: flex;
+    z-index: 9999;   /* Encima del sidebar */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    align-items: flex-end; 
+    pointer-events: none; 
+  }
+
+  .loop img{
+    width: 450px; 
+    filter: drop-shadow(0 0 20px rgba(0,0,0,0.3));
+  }
+
+  /* Botón centrado */
+  .boton-centro {
+    position: fixed;
+    top: 62.5%;
+    left: 37.5%;
+    transform: translate(-50%, -50%);
+    animation: pulso 1.5s infinite ease-in-out;
+    cursor: pointer;
+    z-index: 40; 
+  }
+
+  .boton-centro img {
+    width: 160px;
+    transition: transform 0.2s ease;
+  }
+
+  .boton-centro.active-button img {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px #00d2ff);
+  }
+
+  @keyframes pulso {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.12); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container" tabindex="0">
+  <div class="all">
+    <div class="container2" tabindex="0">
+     <img src="Diseño/Frame 7 (1).png" alt="">
+    </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="Nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+
+<div class="loop" id="loopContainer">
+    <img src="Diseño/Frame 18 (2).png" alt="Loop">
+</div>
+
+<div class="boton-centro" id="btnCentroCont">
+  <img src="Diseño/boton.png" alt="Botón central" id="botonCentral">
+</div>
+
+<script>
+    // ⭐ IMPORTAR TECLAS ⭐
+    const KEYS = window.parent.BITIA_KEYS || { 
+        ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e' 
+    };
+
+    // VARIABLES
+    window.modoSidebar = false; 
+    
+    const rightBar = document.getElementById('rightBar');
+    const rightBarImgs = rightBar.querySelectorAll('img');
+    let rightBarIndex = 0;
+
+    const btnCont = document.getElementById("btnCentroCont");
+    const loopContainer = document.getElementById("loopContainer");
+    
+    // ESTADOS
+    let isIntroActive = true;     
+    let justClosedIntro = false;  
+
+    // === VISUALES ===
+    function updateRightbarFocus() {
+        rightBarImgs.forEach((img, i) => {
+            if (window.modoSidebar && i === rightBarIndex) {
+                img.classList.add('focused');
+            } else {
+                img.classList.remove('focused');
+            }
+        });
+    }
+
+    function updateIndicadorBotonCentral(){
+      // El botón brilla SOLO si no hay sidebar y el personaje ya se fue
+      if(!window.modoSidebar && !isIntroActive){
+        btnCont.classList.add('active-button');
+      } else {
+        btnCont.classList.remove('active-button');
+      }
+    }
+
+    // === FUNCIÓN: CERRAR PERSONAJE ===
+    function cerrarIntro() {
+        // Animación de salida
+        loopContainer.style.transform = 'translateY(100px)';
+        loopContainer.style.opacity = '0';
+        
+        setTimeout(() => {
+            loopContainer.style.display = 'none';
+            isIntroActive = false;
+            
+            // Bloqueo de seguridad (1 seg)
+            justClosedIntro = true;
+            setTimeout(() => { justClosedIntro = false; }, 1000); 
+
+            updateIndicadorBotonCentral();
+        }, 500);
+    }
+
+    // === CONTROL TECLADO ===
+    let accionTimeout = null;
+    let accionLongPress = false;
+    const accionHoldThreshold = 2000; 
+
+    function toggleMode() {
+        window.modoSidebar = !window.modoSidebar;
+        updateRightbarFocus();
+        updateIndicadorBotonCentral();
+
+        try {
+            const parentApp = window.parent.app;
+            if (parentApp && typeof parentApp.setNucleo === 'function') {
+                parentApp.setNucleo(0); // Siempre amarillo en la intro
+            }
+        } catch (e) {}
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.repeat) return; 
+      const key = e.key.toLowerCase();
+
+      // Si está el personaje, cerrar con +
+      if (isIntroActive) {
+          if (key === KEYS.ACCION) {
+              cerrarIntro();
+          }
+          return; 
+      }
+
+      // Sidebar mantenido
+      if (key === KEYS.ACCION) {
+          accionLongPress = false;
+          accionTimeout = setTimeout(() => {
+              accionLongPress = true;
+              toggleMode();
+          }, accionHoldThreshold);
+      }
+
+      // Navegación Sidebar
+      if (window.modoSidebar) {
+        if (key === KEYS.ARRIBA) { rightBarIndex = (rightBarIndex + 1) % rightBarImgs.length; updateRightbarFocus(); }
+        else if (key === KEYS.ABAJO) { rightBarIndex = (rightBarIndex - 1 + rightBarImgs.length) % rightBarImgs.length; updateRightbarFocus(); }
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+      if (isIntroActive) return;
+
+      if (e.key.toLowerCase() === KEYS.ACCION) {
+        if (accionTimeout) {
+            clearTimeout(accionTimeout);
+            accionTimeout = null;
+        }
+
+        // CLICK CORTO (2do CLICK)
+        if (!accionLongPress) {
+          
+          if (justClosedIntro) return; 
+
+          if (window.modoSidebar) {
+              const parentLink = rightBarImgs[rightBarIndex].closest('a');
+              if (parentLink && parentLink.href) window.location.href = parentLink.href;
+          } else {
+              // Ir a Emociones
+              window.location.href = "emociones.html";
+          }
+        }
+      }
+      
+      if (e.key.toLowerCase() === KEYS.SALIR) {
+          window.location.href = 'index.html';
+      }
+    });
+
+    // === ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+            
+            if (isIntroActive) return;
+
+            if (window.modoSidebar) {
+                rightBarIndex = (rightBarIndex + delta + rightBarImgs.length) % rightBarImgs.length;
+                updateRightbarFocus();
+            } 
+        }
+    });
+
+    // INIT
+    updateRightbarFocus();
+    updateIndicadorBotonCentral();
+
+    // Estado 0 (Amarillo)
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try { window.parent.app.setNucleo(0); } catch(e){}
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>

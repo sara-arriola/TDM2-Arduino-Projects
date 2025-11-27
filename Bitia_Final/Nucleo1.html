@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Historia de la Música - Bitia</title>
+
+<link rel="stylesheet" href="nucleo-1/style.css">
+
+<style>
+/* Ajustes Generales */
+body { 
+    margin:0; 
+    overflow: hidden; 
+    background-image: url(Diseño/Frame\ 4.png); 
+    color:#222; 
+    background-size: cover;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background: transparent;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    gap: 100px; 
+}
+
+/* === CONTENEDOR 3D === */
+.container2 {
+    width: 115vh;
+    height: 84vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    position: relative;
+}
+
+.ventana {
+  display: block;
+  perspective: 1400px; 
+  width: 600px;
+  height: 350px;
+  position: relative;
+  z-index: 10;       
+}
+
+.contenedor-3d {
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition: transform 600ms cubic-bezier(.2,.9,.2,1);
+    transform: rotateX(-15deg); 
+}
+
+/* === ESTILO TARJETAS === */
+.calendario-ventana {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border-radius:10px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    color:#fff;
+    font-size:1.25rem;
+    overflow: hidden;
+    backface-visibility:hidden;
+    transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 300ms ease;
+    
+    background: linear-gradient(135deg,#2F6892,#3c7dac);
+}
+
+.contenido-calendario{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 1rem;
+    text-align: left;
+}
+
+.texto-calendario h3 { font-size: 2.5rem; margin-bottom: 10px; color: white; }
+.texto-calendario p { font-size: 1rem; color: #eee; }
+
+.imagen-calendario img{
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.calendario-ventana.front{
+    box-shadow: 0 30px 60px rgba(0,0,0,0.65);
+}
+
+/* === BARRA LATERAL === */
+.rightbar {
+    background: transparent;
+    padding: 14px;
+    border-radius: 8px;
+    width: 25vh;
+    height: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+/* 🔥 LED DE ESTADO 🔥 */
+.status-led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-bottom: 25px; 
+    
+    /* COLOR VERDE (Estado 1) */
+    background-color: #a6ff00; 
+    box-shadow: 0 0 15px #a6ff00, 0 0 5px #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.rightbar img {
+    width: 115px;
+    border-radius: 10px;
+    transition: transform .15s, box-shadow .15s, filter .15s;
+    z-index: 20;
+}
+.rightbar img.focused {
+    outline: 4px solid rgba(255,255,255,0.7);
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.barra {
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+
+    <audio id="musica-nucleo-1" src="/Musicas/frutiger-song-nucleo-1.mp3"></audio>
+  
+  <div class="container2">
+      <div class="ventana" data-ventana="calendario">
+            <!---------- Contenedor 3D de todas las ventanas del calendario ---------->    
+            <div class="contenedor-3d">
+                <!---------- Contenedor individual de los divs individuales o sea cada pagina o año de la linea ---------->
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">1930/40</h3>
+                            <h5>PIONEROS DEL SONIDO</h5>
+                            <p class="parrafo-calendario">Raymond Scott, pionero en la música electrónica y experimental.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1930.png" alt=""></div>
+                    </div>
+                </div>  
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">1950</h3>
+                            <p class="parrafo-calendario">Illiac Suite: Primera pieza generada por computadora.</p>
+                            <p class="parrafo-calendario">Raymond Scott desarrolla el Electronium, máquina que genera música a partir de patrones aleatorios.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1950.png" alt="Imagen de Raymond Scott con su 'Electronium'"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">1960/70</h3>
+                            <p class="parrafo-calendario">MUSIC-N: Programas pioneros de síntesis digital (Max Mathews).</p>
+                            <p class="parrafo-calendario">Primer canto sintético en computadora (“Daisy Bell”), inspiración para HAL 9000.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1960.png" alt="Imagen de Max Mathews"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">1990</h3>
+                            <p class="parrafo-calendario">Proyectos académicos de síntesis de canto (Fraunhofer, MBROLA, DECtalk).</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/1990.png" alt=""></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">2000</h3>
+                            <p class="parrafo-calendario">Vocaloid (Yamaha): Software de síntesis vocal realista.</p>
+                            <p class="parrafo-calendario">Hatsune Miku: Primera estrella pop virtual masiva con conciertos y fandom global.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2000.png" alt="Imagen de 'Hatsune Miku"></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">2010</h3>
+                            <p class="parrafo-calendario">Flow Machines (Daddy 's Car): Primer tema pop compuesto por IA con notoriedad mundial.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2010.png" alt=""></div>
+                    </div>
+                </div>
+                <div class="calendario-ventana">
+                    <div class="contenido-calendario">
+                        <div class="texto-calendario">
+                            <h3 class="year">2020</h3>
+                            <p class="parrafo-calendario">Expansión de la IA musical: AIVA compone bandas sonoras. FN Meka es un rapero virtual. Jukebox, MusicLM o Suno crean canciones completas con letra y música.</p>
+                        </div>
+                        <div class="imagen-calendario"><img src="../img/2020.png" alt="Imagen del rapero IA 'FN Meka'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+
+<script>
+    // IMPORTAR TECLAS GLOBALES
+    const KEYS = window.parent.BITIA_KEYS || { ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e' };
+
+    // VARIABLE DE MODO
+    window.modoSidebar = false; 
+
+    // ELEMENTOS
+    const tarjetas = document.querySelectorAll('.calendario-ventana');
+    const rightBarImgs = document.querySelectorAll('.rightbar img');
+    let rightBarIndex = 0;
+    let indiceCarrusel = 0;
+    
+    // MATH VISUAL ORIGINAL
+    const ESPACIADO_X = 140;
+    const ESPACIADO_Z = 180;
+    const ROT_Y = 0;
+    const FRONT_Z = 160;
+    const FRONT_ESCALA = 1.06;
+
+    // === ACTUALIZAR CARRUSEL ===
+    function actualizarCarrusel() {
+        tarjetas.forEach((tarjeta, i) => {
+            const offset = i - indiceCarrusel;
+            const absOff = Math.abs(offset);
+
+            if (offset === 0) {
+                tarjeta.classList.add('front');
+                tarjeta.style.transform = `translateX(0px) translateZ(${FRONT_Z}px) rotateY(0deg) scale(${FRONT_ESCALA})`;
+                tarjeta.style.opacity = '1';
+                tarjeta.style.zIndex = '1000';
+            } else {
+                tarjeta.classList.remove('front');
+                const dir = offset < 0 ? 1 : -1;
+                const x = offset * ESPACIADO_X;
+                const z = -absOff * ESPACIADO_Z;
+                const rotY = dir * ROT_Y;
+                tarjeta.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotY}deg) scale(1)`;
+                tarjeta.style.opacity = String(Math.max(0.20, 1 - absOff * 0.25));
+                tarjeta.style.zIndex = String(900 - absOff);
+            }
+        });
+    }
+
+    // === ACTUALIZAR SIDEBAR ===
+    function updateRightbarFocus() {
+        rightBarImgs.forEach((img, i) => {
+            if (window.modoSidebar && i === rightBarIndex) {
+                img.classList.add('focused');
+            } else {
+                img.classList.remove('focused');
+            }
+        });
+    }
+
+    // === CONTROL DE MODO ===
+    let accionTimeout = null;
+    let accionLongPress = false;
+    // 🔥 AUMENTADO A 2 SEGUNDOS PARA EVITAR ACCIDENTES 🔥
+    const accionHoldThreshold = 2000; 
+    
+    function toggleMode() {
+        window.modoSidebar = !window.modoSidebar;
+        updateRightbarFocus();
+        
+        // Luces Arduino
+        try {
+            const parentApp = window.parent.app;
+            if (parentApp && typeof parentApp.setNucleo === 'function') {
+                if (window.modoSidebar) parentApp.setNucleo(0); // Amarillo
+                else parentApp.setNucleo(1); // Verde
+            }
+        } catch (e) {}
+    }
+
+    // === TECLADO CON PROTECCIÓN DE REPETICIÓN ===
+    window.addEventListener('keydown', (e) => {
+        // 🔥 IMPORTANTE: Ignora si la tecla se queda pegada por el sistema
+        if (e.repeat) return;
+
+        const key = e.key.toLowerCase();
+
+        // ACCION MANTENIDA
+        if (key === KEYS.ACCION) {
+            accionLongPress = false;
+            accionTimeout = setTimeout(() => {
+                accionLongPress = true;
+                toggleMode();
+            }, accionHoldThreshold); 
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key.toLowerCase() === KEYS.ACCION) {
+            // Si soltamos antes de tiempo, limpiamos el timer
+            if (accionTimeout) {
+                clearTimeout(accionTimeout);
+                accionTimeout = null;
+            }
+            
+            // Click corto en sidebar
+            // 🔥 Solo si NO fue pulsación larga 🔥
+            if (!accionLongPress) {
+                if (window.modoSidebar) {
+                    const target = rightBarImgs[rightBarIndex];
+                    const parentLink = target.closest('a');
+                    // Evita recargar si el link apunta a sí mismo (# o vacio)
+                    if (parentLink && parentLink.getAttribute('href') && parentLink.getAttribute('href') !== '#') {
+                        window.location.href = parentLink.getAttribute('href'); 
+                    }
+                } else {
+                    // En modo carrusel, el click corto puede avanzar 1 slide (opcional)
+                    // O simplemente no hacer nada para evitar confusiones
+                }
+            }
+            
+            // Reseteamos bandera
+            accionLongPress = false;
+        }
+        
+        if (e.key.toLowerCase() === KEYS.SALIR) {
+            window.location.href = 'index.html';
+        }
+    });
+
+    // === ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+
+            if (window.modoSidebar) {
+                // Mover Sidebar
+                rightBarIndex = (rightBarIndex + delta + rightBarImgs.length) % rightBarImgs.length;
+                updateRightbarFocus();
+            } else {
+                // Mover Carrusel (Solo visual)
+                indiceCarrusel += delta; 
+                if (indiceCarrusel < 0) indiceCarrusel = 0;
+                if (indiceCarrusel > tarjetas.length - 1) indiceCarrusel = tarjetas.length - 1;
+                actualizarCarrusel();
+            }
+        }
+    });
+
+    // === INICIALIZAR ===
+    actualizarCarrusel();
+    updateRightbarFocus();
+
+    // Forzar Estado 1 (Verde) al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try {
+                const parentApp = window.parent.app;
+                if (parentApp && typeof parentApp.setNucleo === 'function') {
+                    parentApp.setNucleo(1); 
+                }
+            } catch (e) {}
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>

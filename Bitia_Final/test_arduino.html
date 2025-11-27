@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitia Scroll Test</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* === BARRA SUPERIOR FIJA === */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid #00d2ff;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000; /* Para que quede siempre arriba */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        .btn-conn { background: #00d2ff; color: #000; }
+        .btn-conn:hover { background: #00aacc; }
+
+        .btn-mode { background: #333; color: #fff; border: 1px solid #555; }
+        .btn-mode:hover { background: #555; }
+
+        #status { display: inline-block; margin-left: 15px; color: #aaa; font-size: 12px; }
+
+        /* === CONTENIDO LARGO PARA PODER SCROLLEAR === */
+        .content-wrapper {
+            margin-top: 120px; /* Espacio para la barra fija */
+            padding: 20px;
+            text-align: center;
+            /* Fondo degradado gigante para ver el movimiento */
+            background: linear-gradient(to bottom, #111 0%, #222 25%, #444 50%, #00d2ff 100%);
+            height: 3000px; /* 3000 pixeles de altura forzada */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .marker {
+            font-size: 2rem;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px dashed #fff;
+            width: 50%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button id="btnConnect" class="btn-conn">🔌 CONECTAR ARDUINO</button>
+        
+        <span style="border-left: 1px solid #555; margin: 0 10px;"></span>
+        
+        <button class="btn-mode" onclick="app.setNucleo(0)">Iniciando</button>
+        <button class="btn-mode" onclick="app.setNucleo(1)">Núcleo 1</button>
+        <button class="btn-mode" onclick="app.setNucleo(2)">Núcleo 2</button>
+        <button class="btn-mode" onclick="app.setNucleo(3)">Núcleo 3</button>
+        
+        <span id="status">Desconectado</span>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="marker">Inicio de la Página (0px)</div>
+        <div class="marker">Sección A (500px)</div>
+        <div class="marker">Sección B (1000px)</div>
+        <div class="marker">MITAD DEL CAMINO (1500px)</div>
+        <div class="marker">Sección C (2000px)</div>
+        <div class="marker">Sección D (2500px)</div>
+        <div class="marker">FIN DE LA PÁGINA (3000px)</div>
+    </div>
+
+    <script type="module">
+        import { BitiaConnector } from './bitia_connector.js';
+
+        const arduino = new BitiaConnector();
+        const statusDisplay = document.getElementById('status');
+
+        // --- 1. CONECTAR ---
+        document.getElementById('btnConnect').addEventListener('click', () => {
+            arduino.conectar();
+        });
+
+        // --- 2. FEEDBACK VISUAL DE ESTADO ---
+        arduino.onStatus = (msg) => {
+            statusDisplay.innerText = msg;
+            statusDisplay.style.color = "#0f0";
+        };
+        
+        arduino.onError = (err) => {
+            alert(err);
+            statusDisplay.innerText = "Error";
+            statusDisplay.style.color = "red";
+        };
+
+        // --- 3. LA MAGIA DEL SCROLL ---
+        arduino.onScroll = (direccion) => {
+            
+            // Cantidad de píxeles a mover por cada "tic" del encoder
+            // Ajusta este número si va muy rápido o muy lento
+            const velocidad = 150; 
+
+            if (direccion === "CW") {
+                // Clockwise -> Bajar (Scroll positivo)
+                window.scrollBy({
+                    top: velocidad,
+                    behavior: 'smooth' // Movimiento suave
+                });
+            } else {
+                // Counter-Clockwise -> Subir (Scroll negativo)
+                window.scrollBy({
+                    top: -velocidad,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        // Exponer a window para que funcionen los botones onclick
+        window.app = arduino;
+    </script>
+</body>
+</html>

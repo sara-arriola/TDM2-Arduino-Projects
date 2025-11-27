@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panel de composición - demo</title>
+<style>
+  :root{
+    --bg:#f3f3f6;
+    --panel:#ececf0;
+    --card:#d9d9de;
+    --accent:#f9f9fb;
+    --highlight:#f9d3ff;
+    --muted:#9b9ba6;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background-image: url(Diseño/Frame\ 4.png); color:#222; 
+  background-size: cover;
+  }
+  .container{
+    max-width: 100%;
+    height: 90vh;
+    display: flex;
+    background:#ffffff00;
+    padding:20px;
+    align-items: center;
+    justify-content: center;
+    gap: 100px;
+  }
+
+  .container2{
+    box-shadow:0 6px 24px rgba(0,0,0,0.08);
+    display:flex;
+    gap:18px;
+    background-image: url(Diseño/Frame\ 3.png);
+    background-size: cover;
+    padding-top: 60px;
+    align-items:center;
+    justify-content: center;
+    width: 130vh;
+    border-radius: 10px;
+    height: 60vh;
+    z-index: 2;
+  }
+
+  .grid-panel{
+    background: #56303000;
+    padding:16px;
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+  }
+  .pad-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-auto-rows: 95px;
+    gap:12px;
+    user-select:none;
+    height:calc(100% - 28px);
+  }
+  .pad{
+    border-radius:20px;
+    background:linear-gradient(180deg,#e6e6eb,#dcdce3);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s;
+    cursor:pointer;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.03);
+    width: 90px;
+    height: 90px;
+    font-size: 0px;
+  }
+  .pad:active{ transform:scale(.995); }
+  .pad.cursor{
+    outline:4px solid rgba(255, 255, 255, 0.511);
+    transform: translateY(-3px);
+    box-shadow:0 8px 20px rgba(43,124,255,0.12);
+  }
+  .pad.selected{
+    background:linear-gradient(180deg,#ffffff,#eaf3ff);
+    border:4px solid var(--highlight);
+    transform: scale(1.02);
+  }
+  
+  /* Estilo para filas no activas */
+  .pad.desaturated {
+    filter: grayscale(80%) brightness(85%);
+    opacity: 0.7;
+    transition: filter .2s ease, opacity .2s ease;
+  }
+
+  .composer-panel{
+    background:#815f5f00;
+    border-radius:8px;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+    width: 60%;
+    height: 60vh;
+  }
+  .stack{
+    margin-top:8px;
+    border-radius:8px;
+    padding:12px;
+    background:#22222200;
+  }
+  .stack-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:self-start;
+    max-width: 100%;
+    padding:10px;
+    border-radius:6px;
+    background:#ffffffc6;
+    box-shadow:0 2px 6px rgba(0,0,0,0.03);
+    margin-bottom:8px;
+    height: 10vh;
+  }
+  .stack-item .meta{ font-size:13px; color:#222; }
+  .stack-item .btn{ background:#f2f2f6; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:#444; border:none; }
+
+  /* SIDEBAR */
+  .rightbar{
+    background: #00000000;
+    padding:14px;
+    border-radius:8px;
+    width: 25vh;
+    height:560px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    z-index: 20;
+  }
+
+  /* 🔥 LED ROJO (ESTADO 3) 🔥 */
+  .status-led {
+      display: block !important;
+      width: 15px !important;
+      height: 15px !important;
+      border-radius: 50% !important;
+      margin-bottom: 25px !important;
+      background-color: #a6ff00 !important; 
+      box-shadow: 0 0 15px #a6ff00, 0 0 5px #fff !important;
+      border: 2px solid rgba(255,255,255,0.5) !important;
+  }
+
+  .rightbar img{
+    width: 115px;
+    border-radius:10px;
+    transition:transform .15s, box-shadow .15s;
+    z-index: 20;
+  }
+  .rightbar img.focused{
+    outline:4px solid rgba(255,255,255,0.7);
+    transform:scale(1.05);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  .barra{
+    position: absolute;
+    background-image: url(Diseño/barra\ de\ abajo.png);
+    width: 100%;
+    height: 10vh;
+    top: 90vh;
+  }
+
+  .player{
+    width: 130vh;
+    background-color: #99b7c3da;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .player img{ width: 30vh; margin-left: 3vh; }
+  .all{
+    display: flex; flex-direction: column; width: 130vh; gap: 0 !important; padding: 0 !important;
+  }
+
+  /* OVERLAYS */
+  #introOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  #introOverlay img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+
+  #finalOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
+    align-items: center; justify-content: center; z-index: 99999;
+    flex-direction: column; gap: 20px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container" tabindex="0">
+  <div class="all">
+    <div class="container2" tabindex="0">
+      <div class="grid-panel" id="gridPanel">
+        <div class="pad-grid" id="padGrid" aria-label="Grid de instrumentos"></div>
+      </div>
+      <div class="composer-panel" aria-live="polite">
+        <div class="stack" id="stackArea">
+          <div style="color:var(--muted); font-size:0px;">Pistas seleccionadas:</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="player">
+      <div class="wire-btn circle" title="play/stop"></div>
+      <img src="Diseño/barra reproductor.png" alt="">
+    </div>
+  </div>
+
+  <aside class="rightbar" id="rightBar">
+    <div class="status-led"></div>
+    <div><a href="Nucleo1.html"><img src="Diseño/Frame 4 (1).png" alt=""></a></div>
+    <div><a href="Nucleo2.html"><img src="Diseño/Frame 5.png" alt=""></a></div>
+    <div><a href="Nucleo3.html"><img src="Diseño/Frame 6.png" alt=""></a></div>
+  </aside>
+</div>
+
+<div class="barra"></div>
+
+<div id="introOverlay">
+  <img id="introImage" src="Diseño/LOOP1 (1).png" alt="">
+</div>
+
+<div id="finalOverlay">
+  <p id="qrMessage" style="color: white; font-size: 24px; text-align: center; font-weight: bold;"></p> 
+  <img id="finalImage" src="Diseño/LOOP5.png" style="max-width:80%; height:auto;">
+</div>
+
+<script>
+    // Variables globales de BITIA (se mantienen para compatibilidad)
+    const KEYS = window.parent.BITIA_KEYS || { ACCION: '+', ARRIBA: '8', ABAJO: '0', PLAY: '-', SALIR: 'e', BORRAR: 'z' }; // Añadido BORRAR: 'z'
+
+    const padGrid = document.getElementById('padGrid');
+    const stackArea = document.getElementById('stackArea');
+    const rightBar = document.getElementById('rightBar');
+    const rightBarImgs = rightBar.querySelectorAll('img');
+    const finalOverlay = document.getElementById("finalOverlay"); // Referencia al overlay final
+
+    const ROWS = 4, COLS = 3;
+    let currentRow = 0, currentCol = 0;
+    let mode = 'grid'; 
+    let rightBarIndex = 0;
+    let isIntroActive = true;
+    let showingFinalPrompt = false; // Estado para controlar LOOP5
+    let currentSongAudio = null;    // Para el audio de la canción final
+
+    // ORDEN: VOZ, PIANO, GUITARRA, BATERIA (NOTA: El orden original del HTML era: VOZ, PIANO, GUITARRA, BATERIA)
+    // El orden de selección en el array `selected` es: 0: Voz, 1: Batería, 2: Piano, 3: Guitarra.
+    // El orden de las filas es: 0: Voz, 1: Piano, 2: Guitarra, 3: Batería.
+    
+    // El orden del cálculo de índice de canción será: 0: Guitarra, 1: Batería, 2: Piano, 3: Voz
+    // **Ajuste para que el getSongIndex funcione con el orden de las filas:**
+    // Filas: 0=Voz, 1=Piano, 2=Guitarra, 3=Batería.
+    
+    const labels = [
+        ['Voz 1','Voz 2','Voz 3'],                  
+        ['Piano 1','Piano 2','Piano 3'],            
+        ['Guitarra 1','Guitarra 2','Guitarra 3'],   
+        ['Bateria 1','Bateria 2','Bateria 3']       
+    ];
+    
+    const padImages=[
+        ['Diseño/Property 1=Frame 9.png','Diseño/Property 1=Frame 11.png','Diseño/Property 1=Frame 13.png'],   
+        ['Diseño/Property 1=Frame 15.png','Diseño/Property 1=Frame 17.png','Diseño/Property 1=Frame 19.png'], 
+        ['Diseño/Property 1=Frame 21.png','Diseño/Property 1=Frame 23.png','Diseño/Property 1=Frame 25.png'], 
+        ['Diseño/Property 1=Frame 27.png','Diseño/Property 1=Frame 29.png','Diseño/Property 1=Frame 31.png']  
+    ];
+
+    const selected = [null, null, null, null]; // [Voz, Piano, Guitarra, Bateria]
+    let audioCtx = null;
+
+    function ensureAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } }
+
+    function buildGrid(){
+        padGrid.innerHTML='';
+        for(let r=0;r<ROWS;r++){
+            for(let c=0;c<COLS;c++){
+                const el=document.createElement('div');
+                el.className='pad';
+                el.style.backgroundImage=`url('${padImages[r][c]}')`;
+                el.style.backgroundSize='cover';
+                el.style.backgroundPosition='center';
+                el.dataset.row=r; el.dataset.col=c;
+                el.addEventListener('click',()=>{ currentRow=r; currentCol=c; updateCursor(); selectCurrent(); });
+                padGrid.appendChild(el);
+            }
+        }
+        updateCursor(); refreshSelectionsUI();
+    }
+
+    function getPadElement(row,col){ return padGrid.children[row*COLS+col]; }
+
+    function updateCursor(){
+        Array.from(padGrid.children).forEach(el=>el.classList.remove('cursor'));
+        if(mode==='grid'){
+            const el=getPadElement(currentRow,currentCol);
+            if(el) el.classList.add('cursor');
+        }
+    }
+
+    function clampMod(v,mod){ return ((v%mod)+mod)%mod; }
+
+    function updateRightbarFocus(){
+        rightBarImgs.forEach((img,i)=>img.classList.toggle('focused',i===rightBarIndex));
+    }
+
+    // INTRO
+    const introImages = ["Diseño/LOOP1 (1).png", "Diseño/LOOP2 (1).png", "Diseño/LOOP3 (1).png", "Diseño/LOOP4 (1).png"];
+    let introIndex = 0;
+    const introOverlay = document.getElementById("introOverlay");
+    const introImage = document.getElementById("introImage");
+
+    function nextIntroImage(e) { 
+        if (!isIntroActive) return; 
+        introIndex++;
+        if (introIndex < introImages.length) {
+            introImage.src = introImages[introIndex];
+        } else {
+            introOverlay.style.display = "none";
+            isIntroActive = false; 
+            try{ window.parent.app.setNucleo(3); }catch(e){} 
+        }
+    }
+
+    // CONTROL DE MODO
+    let accionTimeout = null;
+    let accionLongPress = false;
+    const accionHoldThreshold = 2000; 
+
+    function toggleMode() {
+        mode = (mode === 'grid') ? 'rightbar' : 'grid';
+        updateCursor();
+        updateRightbarFocus();
+
+        // LUCES
+        try {
+            const parentApp = window.parent.app;
+            if (parentApp && typeof parentApp.setNucleo === 'function') {
+                if (mode === 'grid') {
+                    parentApp.setNucleo(3); // Rojo
+                } else {
+                    parentApp.setNucleo(0); // Amarillo
+                }
+            }
+        } catch (e) { console.warn(e); }
+    }
+    
+    // Variable para evitar que 'Z' en keyup deseleccione al salir de LOOP5
+    let blockZAction = false; 
+
+    // TECLADO
+    window.addEventListener('keydown', e => {
+        if (e.repeat) return;
+
+        const key = e.key.toLowerCase();
+
+        if (isIntroActive) {
+            if (key === KEYS.ACCION) nextIntroImage();
+            return;
+        }
+        
+        // Manejo de LOOP5 (teclas - y Z)
+        if (showingFinalPrompt) {
+            // Opción 1 → reproducir 20 segundos y terminar (Tecla PLAY: -)
+            if (key === KEYS.PLAY) { 
+                hideFinalPrompt();
+                playTwentySecondsThenFinish(); // Al terminar llama a showQRResult()
+                e.preventDefault();
+            }
+
+            // Opción Z → volver a editar (Tecla BORRAR: z)
+            if (key === KEYS.BORRAR) { 
+                hideFinalPrompt();
+                blockZAction = true; // Bloquea la acción de keyup para 'z'
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }
+            return; // Bloquea otras acciones si se está mostrando LOOP5
+        }
+
+
+        if (key === KEYS.PLAY) {
+            document.querySelector('.wire-btn.circle').click();
+            e.preventDefault();
+        }
+
+        // ACCION LARGA -> SIDEBAR
+        if (key === KEYS.ACCION && !accionTimeout) {
+            accionLongPress = false;
+            accionTimeout = setTimeout(() => {
+                accionLongPress = true;
+                toggleMode();
+                accionTimeout = null;
+            }, accionHoldThreshold);
+        }
+
+        // NAVEGACIÓN TECLAS (0 y 8) = COLUMNAS (Versiones)
+        if (mode === 'grid') {
+            // TECLAS MUEVEN COLUMNAS (HORIZONTALES)
+            if (key === KEYS.ARRIBA) { currentCol = clampMod(currentCol + 1, COLS); updateCursor(); } 
+            else if (key === KEYS.ABAJO) { currentCol = clampMod(currentCol - 1, COLS); updateCursor(); }
+        } else if (mode === 'rightbar') {
+            if (key === KEYS.ARRIBA) { rightBarIndex = clampMod(rightBarIndex + 1, rightBarImgs.length); updateRightbarFocus(); }
+            else if (key === KEYS.ABAJO) { rightBarIndex = clampMod(rightBarIndex - 1, rightBarImgs.length); updateRightbarFocus(); }
+        }
+    });
+
+    window.addEventListener('keyup', e => {
+        if (isIntroActive) return;
+
+        const key = e.key.toLowerCase();
+        
+        // BORRAR SELECCIÓN ACTUAL (Tecla Z)
+        if (key === KEYS.BORRAR) {
+            if (blockZAction) {
+                // Si estaba bloqueada por salir de LOOP5, limpia el bloqueo y no hace nada
+                blockZAction = false;
+            } else if (mode === 'grid') {
+                // Acción de borrar la selección actual
+                stopSelection(currentRow);
+                refreshSelectionsUI();
+                refreshGridSelectedMarkers();
+            }
+        }
+
+        if (key === KEYS.ACCION) {
+            if (accionTimeout) {
+                clearTimeout(accionTimeout);
+                accionTimeout = null;
+            }
+
+            // ACCION CORTA
+            if (!accionLongPress) {
+                if (mode === 'grid') selectCurrent();
+                else if (mode === 'rightbar') {
+                    const target = rightBarImgs[rightBarIndex];
+                    const parentLink = target.closest('a');
+                    if (parentLink && parentLink.href && parentLink.getAttribute('href') !== '#') {
+                        window.location.href = parentLink.href;
+                    } else {
+                        activateRightbarItem();
+                    }
+                }
+            }
+            accionLongPress = false;
+        }
+        
+        if (key === KEYS.SALIR) {
+            window.location.href = 'inicio.html';
+        }
+    });
+
+    function activateRightbarItem(){
+      const target=rightBarImgs[rightBarIndex];
+      if(!target) return;
+      target.style.transform='scale(1.2)';
+      setTimeout(()=>updateRightbarFocus(),200);
+    }
+
+    // === ENCODER ===
+    window.addEventListener('message', (evento) => {
+        if (evento.data && evento.data.tipo === 'ENCODER_BITIA') {
+            const delta = (evento.data.dir === "CW") ? 1 : -1;
+            if (isIntroActive || showingFinalPrompt) return; // Bloquear encoder en intro y LOOP5
+
+            if (mode === 'grid') {
+                // ENCODER MUEVE FILAS (INSTRUMENTOS)
+                currentRow = clampMod(currentRow + delta, ROWS);
+                updateCursor(); 
+            } else if (mode === 'rightbar') {
+                rightBarIndex = clampMod(rightBarIndex + delta, rightBarImgs.length);
+                updateRightbarFocus(); 
+            }
+        }
+    });
+
+    // AUDIO / PLAYERS
+    async function selectCurrent(){
+        const row=currentRow, col=currentCol;
+        // Si ya estaba seleccionado, lo deselecciona (BORRAR TU ELECCION)
+        if(selected[row] && selected[row].col===col){ 
+            stopSelection(row); 
+            refreshSelectionsUI(); 
+            refreshGridSelectedMarkers(); 
+            updateRowSaturation(row, -1); 
+            return; 
+        }
+        if(selected[row]) stopSelection(row);
+        const label=labels[row][col];
+        const nodeObj=await playToneFor(row,col);
+        selected[row]={col,label,nodeObj};
+        refreshSelectionsUI(); 
+        refreshGridSelectedMarkers(); 
+        updateRowSaturation(row, col); 
+        
+        // Comprobar si los 4 instrumentos están seleccionados
+        if (checkAllSelected() && !showingFinalPrompt) {
+             // Retraso para que el usuario perciba la última selección
+            setTimeout(showFinalPrompt, 500); 
+        }
+    }
+
+    function updateRowSaturation(row, selectedCol) {
+        for (let c = 0; c < COLS; c++) {
+            const el = getPadElement(row, c);
+            if (!el) continue; 
+            if (c !== selectedCol) el.classList.add('desaturated');
+            else el.classList.remove('desaturated');
+        }
+    }
+
+    async function playToneFor(row,col){
+        const audioFiles=[
+            ['Musicas/voz1.m4a','Musicas/voz2.m4a','Musicas/voz3.m4a'],                 
+            ['Musicas/piano2.mp3','Musicas/piano3.mp3','Musicas/piano1.mp3'],             
+            ['Musicas/guitarra1.mp3','Musicas/guitarra2.mp3','Musicas/guitarra3.mp3'],    
+            ['Musicas/bateria1.mp3','Musicas/bateria3.mp3','Musicas/bateria2.mp3']        
+        ];
+        const file=audioFiles[row][col];
+        const audio=new Audio(file);
+        audio.loop=true; // ⭐ Modificado para que haga loop de preview
+        audio.volume=0.6;
+        
+        // Detener solo los loops de instrumentos (deja el reproductor principal intacto)
+        // Se detienen todos al seleccionar uno nuevo para que sólo suene el nuevo loop
+        for(let r=0;r<ROWS;r++){ 
+            if(selected[r]?.nodeObj?.audio){ 
+                selected[r].nodeObj.audio.pause(); 
+                selected[r].nodeObj.audio.currentTime=0; 
+            } 
+        }
+        
+        // Detener el reproductor principal si estaba activo
+        const playButton = document.querySelector('.wire-btn.circle');
+        isPlaying = false;
+        playButton.textContent = '▶️';
+        
+        // Reproducir solo el audio seleccionado (loop de previsualización)
+        audio.play().catch(()=>{});
+        
+        ensureAudio();
+        // El resto del código de buffer no se usa actualmente para la reproducción en loop, 
+        // pero se mantiene por si el reproductor principal lo requiere más tarde.
+        let audioBuffer=null;
+        try{
+            const resp=await fetch(file);
+            const ab=await resp.arrayBuffer();
+            audioBuffer=await audioCtx.decodeAudioData(ab.slice(0));
+        }catch(err){}
+        return{audio,audioBuffer,stop:()=>{audio.pause();audio.currentTime=0;},label:labels[row][col]};
+    }
+
+    // FUNCION DE BORRADO: Detiene y elimina la selección de una fila (row)
+    function stopSelection(row){ 
+        if(!selected[row]) return; 
+        
+        // Detener el audio asociado
+        try{ selected[row].nodeObj.stop(); }catch(e){} 
+        
+        // Eliminar del array de seleccionados
+        selected[row]=null; 
+        
+        // Actualizar la interfaz (de-saturar y quitar el marker)
+        updateRowSaturation(row, -1); 
+        refreshGridSelectedMarkers();
+    }
+
+    function refreshGridSelectedMarkers(){
+        Array.from(padGrid.children).forEach(el=>{
+            el.classList.remove('selected');
+            const r=+el.dataset.row,c=+el.dataset.col;
+            if(selected[r] && selected[r].col===c) el.classList.add('selected');
+        });
+    }
+
+function refreshSelectionsUI(){
+    // 1. Limpiar el panel de pistas (excepto el encabezado)
+    while(stackArea.children.length>1) stackArea.removeChild(stackArea.lastChild);
+    
+    for(let r=0;r<ROWS;r++){
+        if(selected[r]){
+            const wrapper=document.createElement('div');
+            wrapper.className='stack-item';
+            // Estilos para organizar el contenido (título, botón y onda)
+            wrapper.style.display='flex';
+            wrapper.style.flexDirection='column';
+            wrapper.style.gap='6px';
+
+            const top=document.createElement('div');
+            top.style.display='flex';
+            top.style.justifyContent='space-between';
+            top.style.alignItems='center';
+
+            const meta=document.createElement('div');
+            meta.className='meta';
+            // Aquí se muestra el texto del instrumento
+            meta.innerHTML=`<strong>${selected[r].label}</strong>`;
+
+            const btn=document.createElement('button');
+            btn.className='btn';
+            btn.textContent='Quitar';
+            btn.addEventListener('click',()=>{ stopSelection(r); refreshSelectionsUI(); refreshGridSelectedMarkers(); });
+
+            top.appendChild(meta); 
+            top.appendChild(btn); 
+            wrapper.appendChild(top);
+            
+            // ⭐⭐⭐ CÓDIGO CLAVE PARA DIBUJAR LA ONDA ⭐⭐⭐
+            const canvas=document.createElement('canvas'); // 1. CREAR EL ELEMENTO CANVAS
+            canvas.width=300; 
+            canvas.height=60; 
+            wrapper.appendChild(canvas); // 2. AÑADIRLO AL WRAPPER
+            
+            // 3. Lógica de color y llamada a la función de dibujo
+            if(selected[r].nodeObj?.audioBuffer){ 
+                // Obtiene la primera palabra del label ('Voz 1' -> 'voz')
+                const instrumentType = selected[r].label.toLowerCase().split(' ')[0]; 
+                // Asigna el color basado en el tipo de instrumento
+                const waveformColor = INSTRUMENT_COLORS[instrumentType] || INSTRUMENT_COLORS['default'];
+                drawWaveform(selected[r].nodeObj.audioBuffer, canvas, waveformColor); 
+            }
+            // ⭐⭐⭐ FIN DEL CÓDIGO CLAVE ⭐⭐⭐
+            
+            stackArea.appendChild(wrapper);
+        }
+    }
+    refreshGridSelectedMarkers();
+}
+
+// ⭐ AÑADE ESTO AL PRINCIPIO DE TU SCRIPT (fuera de cualquier función) ⭐
+const INSTRUMENT_COLORS = {
+    'voz': '#ff0000',      // Rojo
+    'piano': '#00ff00',    // Verde
+    'guitarra': '#0000ff', // Azul
+    'bateria': '#ffff00',  // Amarillo
+    'default': '#ffffff'   // Blanco por defecto si no coincide
+};
+// Asegúrate también que la función drawWaveform no se eliminó:
+// ⭐ REEMPLAZA TU drawWaveform CON ESTA VERSIÓN COMPLETA ⭐
+function drawWaveform(audioBuffer, canvas, color) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width, height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    if (!audioBuffer) {
+        ctx.fillStyle = '#444';
+        ctx.font = '12px Arial';
+        ctx.fillText('⚠️ Sin forma de onda', 10, 20);
+        return;
+    }
+
+    const data = audioBuffer.getChannelData(0);
+    const bufferLength = data.length;
+    
+    // Configuración para el estilo de barras
+    const barWidth = 3; 
+    const gap = 1;      
+    const totalBarWidth = barWidth + gap;
+    const numBars = Math.floor(width / totalBarWidth);
+    
+    ctx.fillStyle = color || '#ffffff'; // Usar el color del instrumento
+
+    const centerY = height / 2;
+
+    for (let i = 0; i < numBars; i++) {
+        const x = i * totalBarWidth; 
+
+        // Segmento de datos para la barra
+        const start = Math.floor((i / numBars) * bufferLength);
+        const end = Math.floor(((i + 1) / numBars) * bufferLength);
+        
+        let sum = 0;
+        for (let j = start; j < end; j++) {
+            sum += Math.abs(data[j]); 
+        }
+        const average = sum / (end - start);
+
+        // Altura de la barra
+        let barHeight = average * height * 1.5; 
+        if (barHeight < 2) barHeight = 2; 
+
+        // Dibujar la barra centrada
+        ctx.fillRect(x, centerY - barHeight / 2, barWidth, barHeight);
+    }
+}
+
+    function checkAllSelected() { return selected.every(s => s !== null); }
+    
+    // ====================================================================================
+    // 🎤 LÓGICA DE FINALIZACIÓN: LOOP5, QR, Y CANCIÓN FINAL
+    // ====================================================================================
+    
+    // Mapeo de canciones finales (pregrabadas) basado en la columna de la VOZ (Fila 0)
+    // Orden de los grupos: Voz 1 (col 0) = 10 canciones, Voz 2 (col 1) = 8 canciones, Voz 3 (col 2) = 10 canciones
+    const songGroups = [
+        [ // Voz 1 (10 canciones)
+            'Musicas/Canciones/Cancion_1.mp3', 'Musicas/Canciones/Cancion_2.mp3', 'Musicas/Canciones/Cancion_3.mp3', 
+            'Musicas/Canciones/Cancion_4.mp3', 'Musicas/Canciones/Cancion_5.mp3', 'Musicas/Canciones/Cancion_6.mp3', 
+            'Musicas/Canciones/Cancion_7.mp3', 'Musicas/Canciones/Cancion_8.mp3', 'Musicas/Canciones/Cancion_9.mp3', 
+            'Musicas/Canciones/Cancion_10.mp3'
+        ],
+        [ // Voz 2 (8 canciones)
+            'Musicas/Canciones/Cancion_11.mp3', 'Musicas/Canciones/Cancion_12.mp3', 'Musicas/Canciones/Cancion_13.mp3', 
+            'Musicas/Canciones/Cancion_14.mp3', 'Musicas/Canciones/Cancion_15.mp3', 'Musicas/Canciones/Cancion_16.mp3', 
+            'Musicas/Canciones/Cancion_17.mp3', 'Musicas/Canciones/Cancion_18.mp3'
+        ],
+        [ // Voz 3 (10 canciones)
+            'Musicas/Canciones/Cancion_19.mp3', 'Musicas/Canciones/Cancion_20.mp3', 'Musicas/Canciones/Cancion_21.mp3', 
+            'Musicas/Canciones/Cancion_22.mp3', 'Musicas/Canciones/Cancion_23.mp3', 'Musicas/Canciones/Cancion_24.mp3', 
+            'Musicas/Canciones/Cancion_25.mp3', 'Musicas/Canciones/Cancion_26.mp3', 'Musicas/Canciones/Cancion_27.mp3', 
+            'Musicas/Canciones/Cancion_28.mp3'
+        ]
+    ];
+
+
+    function getSongIndex() {
+        // Filas: 0=Voz, 1=Piano, 2=Guitarra, 3=Batería.
+        
+        // 1. Obtener la combinación de Guitarra (Fila 2), Batería (Fila 3) y Piano (Fila 1) - Base 3
+        let totalIndex = 0;
+        // Guitarra (Fila 2) -> Multiplicador 1
+        totalIndex += selected[2].col * 1; 
+        // Batería (Fila 3) -> Multiplicador 3
+        totalIndex += selected[3].col * 3; 
+        // Piano (Fila 1) -> Multiplicador 9
+        totalIndex += selected[1].col * 9; 
+
+        // totalIndex varía de 0 a (2*1 + 2*3 + 2*9) = 26. (27 combinaciones)
+
+        // 2. Determinar el grupo y el índice de la canción DENTRO del grupo (depende de la VOZ, Fila 0)
+        const voiceCol = selected[0].col; // Columna de la Voz: 0, 1, o 2
+        const songGroup = songGroups[voiceCol];
+        const groupSize = songGroup.length; 
+        
+        // Índice dentro del grupo (0 a 9, 0 a 7, o 0 a 9)
+        const songIndexInGroup = totalIndex % groupSize; 
+
+        // 3. Determinar el ÍNDICE ACUMULADO de QR (0 a 27)
+        let qrIndex = 0;
+
+        if (voiceCol === 0) { // Grupo 1 (Voz 1): 10 canciones
+            qrIndex = songIndexInGroup; // QR de 0 a 9
+        } else if (voiceCol === 1) { // Grupo 2 (Voz 2): 8 canciones
+            qrIndex = 10 + songIndexInGroup; // QR de 10 a 17
+        } else if (voiceCol === 2) { // Grupo 3 (Voz 3): 10 canciones
+            qrIndex = 18 + songIndexInGroup; // QR de 18 a 27
+        }
+        
+        return {
+            songPath: songGroup[songIndexInGroup], // Ruta de la canción
+            qrIndex: qrIndex // Índice del QR (0 a 27)
+        };
+    }
+
+    async function showFinalPrompt() {
+        showingFinalPrompt = true;
+
+        // 1. Detener TODO lo que esté sonando (loops de preview, reproductor principal)
+        playButton.textContent = '▶️';
+        isPlaying = false;
+        for (let r = 0; r < ROWS; r++) {
+            if (selected[r]?.nodeObj?.audio) {
+                selected[r].nodeObj.audio.pause();
+                selected[r].nodeObj.audio.currentTime = 0;
+            }
+        }
+        
+        // 2. Reproducir SOLO el último instrumento seleccionado por 5 segundos (preview)
+        let lastRow = currentRow; // Usar la fila que acaba de ser seleccionada
+
+        if (lastRow !== -1) {
+            // Re-reproducir el último instrumento SIN loop
+            const lastAudio = new Audio(selected[lastRow].nodeObj.audio.src);
+            lastAudio.loop = false;
+            lastAudio.volume = 0.6;
+            lastAudio.currentTime = 0;
+            
+            await lastAudio.play().catch(() => {});
+            
+            // 3. Esperar 5 segundos (o hasta que termine la reproducción si dura menos)
+            const duration = selected[lastRow].nodeObj.audio.duration; // Obtener la duración real del loop
+            await new Promise(res => setTimeout(res, Math.min(5000, duration * 1000 + 500))); // 5s o la duración + margen
+
+            // 4. Detener la reproducción del último instrumento
+            lastAudio.pause();
+            lastAudio.currentTime = 0;
+        }
+
+
+        // 5. Mostrar LOOP5
+        document.getElementById("finalImage").src = "Diseño/LOOP5.png"; // Asegurar que se muestra LOOP5
+        document.getElementById("finalImage").style.width = "auto";
+        document.getElementById("qrMessage").textContent = "";
+        finalOverlay.style.display = "flex";
+        
+    }
+
+    function hideFinalPrompt() {
+        showingFinalPrompt = false;
+        finalOverlay.style.display = "none";
+        document.getElementById("qrMessage").textContent = "";
+    }
+    
+    async function playTwentySecondsThenFinish() {
+        ensureAudio();
+
+        // 1. Obtener la ruta de la canción pregrabada y el índice del QR
+        const { songPath } = getSongIndex(); 
+
+        // 2. 🛑 DETENER TODOS LOS LOOPS Y EL REPRODUCTOR
+        for (let r = 0; r < ROWS; r++) {
+            if (selected[r]?.nodeObj?.audio) {
+                selected[r].nodeObj.audio.pause();
+                selected[r].nodeObj.audio.currentTime = 0;
+            }
+        }
+        playButton.textContent = '▶️';
+        isPlaying = false;
+        
+        // Detener y limpiar la canción anterior si existe (si se pulsa '-' varias veces)
+        if (currentSongAudio) {
+            currentSongAudio.pause();
+            currentSongAudio.currentTime = 0;
+            currentSongAudio = null;
+        }
+
+        // 3. Cargar y reproducir la nueva canción
+        currentSongAudio = new Audio(songPath);
+        currentSongAudio.volume = 0.6;
+        
+        // Mostrar mensaje de reproducción
+        document.getElementById("finalImage").src = "Diseño/LOOP5.png"; // Opcional, mantener el mismo fondo
+        document.getElementById("finalImage").style.width = "auto";
+        document.getElementById("qrMessage").textContent = "🎶 Reproduciendo tu canción... 🎶";
+        finalOverlay.style.display = "none";
+
+        await currentSongAudio.play().catch(e => {
+            console.warn("Error al intentar reproducir el audio de la canción:", e);
+        });
+
+        // 4. Esperar 20 segundos
+        await new Promise(res => setTimeout(res, 20000));
+
+        // 5. Detener la canción pregrabada
+        if (currentSongAudio) {
+            currentSongAudio.pause();
+            currentSongAudio.currentTime = 0;
+        }
+
+        // 6. Mostrar QR correcto
+        showQRResult();
+    }
+
+    function showQRResult() { 
+        const finalImg = document.getElementById("finalImage");
+        const qrMessage = document.getElementById("qrMessage");
+        
+        const { qrIndex } = getSongIndex(); // Obtener el índice de QR (0 a 27)
+
+        // El primer QR (índice 0) debe ser Untitled(27). Por lo tanto, sumamos 27.
+        // 0 -> Untitled(27).png, 27 -> Untitled(54).png
+        const fileNumber = qrIndex + 27;
+
+        qrMessage.textContent = "Escanea el QR para descargar tu canción";
+        finalImg.src = `QR/Untitled (${fileNumber}).png`;
+        finalImg.style.width = "250px"; // Ajustar el tamaño para el QR
+        
+        finalOverlay.style.display = "flex"; // Mantener visible
+
+        // ⭐⭐ REDIRECCIÓN AUTOMÁTICA DESPUÉS DE 25 SEGUNDOS ⭐⭐
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 50000); 
+    }
+
+
+    // ====================================================================================
+    // REPRODUCTOR PRINCIPAL
+    // ====================================================================================
+    let isPlaying=false;
+    const playButton=document.querySelector('.wire-btn.circle');
+    playButton.textContent='▶️';
+    playButton.addEventListener('click',()=>{
+      // Bloquear si el overlay final está activo
+      if (showingFinalPrompt) return; 
+
+      ensureAudio();
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      
+      // Detener loops de previsualización al presionar Play/Pause
+      for(let r=0;r<ROWS;r++){ 
+          if(selected[r]?.nodeObj?.audio){ 
+              selected[r].nodeObj.audio.pause(); 
+              selected[r].nodeObj.audio.currentTime=0; 
+          } 
+      }
+      
+      if(!isPlaying){
+        // Si no está sonando, empezar a reproducir todos los seleccionados en loop
+        for(let r=0;r<ROWS;r++){ 
+            if(selected[r]?.nodeObj?.audio){ 
+                const a=selected[r].nodeObj.audio; 
+                a.loop = true; // Asegurar que es loop (el selectCurrent lo puso en loop=true, pero por si acaso)
+                a.currentTime=0; 
+                a.play().catch(()=>{}); 
+            } 
+        }
+        playButton.textContent='⏸️';
+      }else{
+        // Si está sonando, pausar todos
+        for(let r=0;r<ROWS;r++){ 
+            if(selected[r]?.nodeObj?.audio){ 
+                selected[r].nodeObj.audio.pause(); 
+            } 
+        }
+        playButton.textContent='▶️';
+      }
+      isPlaying=!isPlaying;
+    });
+
+    // INIT
+    buildGrid();
+    updateRightbarFocus();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            try { window.parent.app.setNucleo(3); } catch(e){}
+        }, 200);
+    });
+
+</script>
+
+</body>
+</html>
